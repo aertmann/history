@@ -1,0 +1,227 @@
+{namespace neos=TYPO3\Neos\ViewHelpers}
+{namespace m=TYPO3\Media\ViewHelpers}
+{namespace ts=TYPO3\TypoScript\ViewHelpers}
+{namespace ae=AE\History\ViewHelpers}
+
+<div class="neos-history">
+	<legend>{neos:backend.translate(id: 'history.messages.hereIsWhatHappenedRecentlyInNeos', source: 'Modules', package: 'TYPO3.Neos')}</legend>
+	<f:if condition="{sites -> f:count()} > 1">
+		<form action="{f:uri.action(action: 'index')}" method="get" class="neos-history-site-form">
+			<label for="site">Site</label>
+			<f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
+		</form>
+	</f:if>
+	<f:if condition="{eventsByDate}">
+		<f:then>
+			<f:for each="{eventsByDate}" as="eventsOnSingleDay" iteration="iteration">
+				<div class="neos-history-day" data-date="{eventsOnSingleDay.day -> f:format.date(format: 'dmy')}">
+					<div class="neos-history-date">
+						<div class="neos-history-date-inner" title="{eventsOnSingleDay.day -> f:format.date(format: 'Y')}">{eventsOnSingleDay.day -> f:format.date(format: 'M d')}</div>
+					</div>
+					<div class="neos-history-events neos-history-alignment">
+						<f:groupedFor each="{eventsOnSingleDay.events}" as="eventsByTime" groupBy="timestamp" groupKey="timestamp">
+							<div class="neos-history-date">
+								<div class="neos-history-date-inner" title="{timestamp -> f:format.date(format: 'H:i:s')}">{timestamp -> f:format.date(format: 'H:i')}</div>
+							</div>
+							<f:for each="{eventsByTime}" as="event">
+								<ts:render path="eventRenderer" context="{event: event, node: node, site: site}" />
+							</f:for>
+						</f:groupedFor>
+					</div>
+				</div>
+			</f:for>
+		</f:then>
+		<f:else>
+			<p>{neos:backend.translate(id: 'history.messages.emptyHistory', source: 'Modules', package: 'TYPO3.Neos')}</p>
+		</f:else>
+	</f:if>
+</div>
+
+<f:section name="eventElement">
+	<div class="neos-history-event">
+		<div class="neos-history-event-arrow"></div>
+		<h3 class="neos-history-event-title">
+
+			<f:if condition="{event.node}">
+				<f:then>
+					<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" additionalAttributes="{title: '{f:render(section: \'documentBreadcrumb\', arguments: {node: event.node})}'}" data="{'neos-toggle': 'tooltip'}">
+						<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
+					</f:link.action>
+					<neos:link.node node="{event.node}"><i class="icon-external-link" style="float:right"></i></neos:link.node>
+				</f:then>
+				<f:else>
+					<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" title="{neos:backend.translate(id: 'history.nodeRemovedInMeantime', source: 'Modules', package: 'TYPO3.Neos')}" data="{'neos-toggle': 'tooltip'}">
+						<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
+					</f:link.action>
+				</f:else>
+			</f:if>
+		</h3>
+		<div class="neos-history-event-content">
+			{content -> f:format.raw()}
+		</div>
+	</div>
+</f:section>
+
+<f:section name="subEventElement">
+	<div class="neos-history-sub-event" id="{f:format.identifier(value: event)}">
+		<div class="neos-history-event-user" title="{event.accountIdentifier -> neos:backend.userInitials(format: 'fullName')}">
+			{event.accountIdentifier -> neos:backend.userInitials()}
+		</div>
+		<div class="neos-history-event-description">
+			{neos:backend.translate(id: descriptionTranslationId, source: 'Modules', package: 'TYPO3.Neos', arguments: descriptionTranslationArguments) -> f:format.raw()}
+			<f:if condition="{event.data.old}">
+				<ae:diff nodeEvent="{event}">
+					<f:if condition="{changes -> f:count()} > 0">
+						<span class="neos-history-event-details" data-neos-toggle="popover" data-placement="bottom" data-title="Modifications to <i class='{ae:nodeTypeIcon(nodeType: event.data.nodeType)}'></i> {event.data.nodeLabel}" data-html="true" data-content="{f:render(section: 'changes', arguments: {changes: changes}) -> f:format.htmlentities()}"><i class="icon-question-sign"></i></span>
+					</f:if>
+				</ae:diff>
+			</f:if>
+		</div>
+	</div>
+</f:section>
+
+<f:section name="changes">
+	<table class="neos-content-diff">
+		<f:for each="{changes}" key="propertyName" as="change">
+			<tr>
+				<th colspan="3">{neos:backend.translate(id: change.propertyLabel)}</th>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<f:if condition="{change.type} == 'text'">
+						<table>
+							<f:for each="{change.diff}" key="index" as="blocks">
+								<f:for each="{blocks}" as="block">
+									<tr>
+										<td>
+											<f:for each="{block.base.lines}" as="line">
+												{line -> f:format.raw()}
+											</f:for>
+										</td>
+										<td>
+											<f:for each="{block.changed.lines}" as="line">
+												{line -> f:format.raw()}
+											</f:for>
+										</td>
+									</tr>
+								</f:for>
+							</f:for>
+						</table>
+					</f:if>
+					<f:if condition="{change.type} == 'image'">
+						<table>
+							<tr>
+								<td>
+									<f:if condition="{change.original}">
+										<m:image asset="{change.original}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt=""/>
+									</f:if>
+								</td>
+								<td>
+									<f:if condition="{change.changed}">
+										<m:image asset="{change.changed}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt=""/>
+									</f:if>
+								</td>
+							</tr>
+						</table>
+					</f:if>
+					<f:if condition="{change.type} == 'asset'">
+						<table>
+							<tr>
+								<td>
+									<f:if condition="{change.original}">
+										<del><a href="{f:uri.resource(resource: change.original.resource)}">{change.original.resource.filename}</a></del>
+									</f:if>
+								</td>
+								<td>
+									<f:if condition="{change.changed}">
+										<ins><a href="{f:uri.resource(resource: change.changed.resource)}">{change.changed.resource.filename}</a></ins>
+									</f:if>
+								</td>
+							</tr>
+						</table>
+					</f:if>
+					<f:if condition="{change.type} == 'datetime'">
+						<table>
+							<tr>
+								<td>
+									<f:format.date format="d.m.Y H:i:s" date="{change.original}" />
+								</td>
+								<td>
+									<f:format.date format="d.m.Y H:i:s" date="{change.changed}" />
+								</td>
+							</tr>
+						</table>
+					</f:if>
+				</td>
+			</tr>
+		</f:for>
+	</table>
+</f:section>
+
+<f:section name="documentBreadcrumb">
+	<neos:backend.documentBreadcrumbPath node="{node}"><f:for each="{documentNodes}" as="documentNode" iteration="{iterator}">/ {documentNode.label} </f:for></neos:backend.documentBreadcrumbPath>
+</f:section>
+
+<f:if condition="{nextPage}">
+  <div class="loadMore" data-neos-history-nextpage="{nextPage -> f:format.raw()}">
+	  <button>{neos:backend.translate(id: 'history.loadMore.label', source: 'Modules', package: 'TYPO3.Neos')}</button>
+  </div>
+</f:if>
+
+<script>
+	$(function() {
+		var loadMore = $('.loadMore');
+		var nextPage = loadMore.data('neos-history-nextpage');
+		var historyContainer = $('.neos-history');
+		$('#site').change(function() {
+			this.form.submit();
+		});
+		$('button', loadMore).click(function() {
+			$.ajax({
+				url: nextPage,
+				type: 'GET'
+			}).done(function(data) {
+				nextPage = $(data).find('.loadMore').data('neos-history-nextpage');
+				if (typeof nextPage === 'undefined') {
+					$('.loadMore').hide();
+				}
+
+				var days = $(data).find('.neos-history-day');
+				days.each(function(index, day) {
+					var date = $(day).data('date');
+					var $existingDay = $('[data-date="' + date + '"]');
+
+					if ($existingDay.length > 0) {
+						$(day).find('.neos-history-event').each(function(index, event) {
+							$existingDay.find('.neos-history-events').append(event);
+						});
+					} else {
+						historyContainer.append(day);
+					}
+					initializeBootstrap();
+				});
+			});
+		});
+		var initializeBootstrap = function() {
+			require(
+				{
+					baseUrl: 'resource://TYPO3.Neos/Public/JavaScript',
+					paths: requirePaths,
+					context: 'neos',
+					locale: 'en'
+				},
+				[
+					'Library/jquery-with-dependencies'
+				],
+				function($) {
+					$('[data-neos-toggle="popover"]').popover();
+					$('[data-neos-toggle="tooltip"]').tooltip();
+					$('[data-neos-toggle]').on('click', function() {
+						$('[data-neos-toggle]').not(this).popover('hide');
+					});
+				}
+			)
+		}
+		initializeBootstrap();
+	})
+</script>

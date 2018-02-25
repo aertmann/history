@@ -1,0 +1,11 @@
+privilegeTargets:
+  'TYPO3\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'AE.History:BackendModule':
+      matcher: 'within(AE\History\Controller\HistoryController) && method(public .*->(?!initialize).*Action())'
+
+roles:
+  'TYPO3.Neos:Administrator':
+    privileges:
+      -
+        privilegeTarget: 'AE.History:BackendModule'
+        permission: GRANT

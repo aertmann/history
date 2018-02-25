@@ -1,0 +1,6 @@
+'TYPO3.Neos:Node':
+  ui:
+    inspector:
+      views:
+        nodeInfo:
+          view: 'AE.History/Views/NodeInfoView'
