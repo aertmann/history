@@ -143,6 +143,10 @@ $wideMargin: 32px;
 					.neos-popover {
 						width: 600px;
 
+						.neos-popover-title i {
+							vertical-align: top;
+						}
+
 						table {
 							width: 100%;
 
