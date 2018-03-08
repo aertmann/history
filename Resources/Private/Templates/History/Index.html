@@ -241,6 +241,13 @@
 					$('[data-neos-toggle]').on('click', function() {
 						$('[data-neos-toggle]').not(this).popover('hide');
 					});
+					$('body').on('click', function (e) {
+						if ($(e.target).data('neos-toggle') !== 'popover' &&
+							$(e.target).parents('[data-neos-toggle="popover"]').length === 0 &&
+							$(e.target).parents('.neos-popover.neos-in').length === 0) {
+							$('[data-neos-toggle]').popover('hide');
+						}
+					});
 				}
 			)
 		}
