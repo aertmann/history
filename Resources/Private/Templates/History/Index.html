@@ -111,12 +111,16 @@
 							<tr>
 								<td>
 									<f:if condition="{change.original}">
-										<m:image asset="{change.original}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt=""/>
+										<ae:assetExists asset="{change.original}">
+											<m:image asset="{change.original}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt="" />
+										</ae:assetExists>
 									</f:if>
 								</td>
 								<td>
 									<f:if condition="{change.changed}">
-										<m:image asset="{change.changed}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt=""/>
+										<ae:assetExists asset="{change.changed}">
+											<m:image asset="{change.changed}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt="" />
+										</ae:assetExists>
 									</f:if>
 								</td>
 							</tr>
@@ -127,12 +131,16 @@
 							<tr>
 								<td>
 									<f:if condition="{change.original}">
-										<del><a href="{f:uri.resource(resource: change.original.resource)}">{change.original.resource.filename}</a></del>
+										<ae:assetExists asset="{change.original}">
+											<del><a href="{f:uri.resource(resource: change.original.resource)}">{change.original.resource.filename}</a></del>
+										</ae:assetExists>
 									</f:if>
 								</td>
 								<td>
 									<f:if condition="{change.changed}">
-										<ins><a href="{f:uri.resource(resource: change.changed.resource)}">{change.changed.resource.filename}</a></ins>
+										<ae:assetExists asset="{change.changed}">
+											<ins><a href="{f:uri.resource(resource: change.changed.resource)}">{change.changed.resource.filename}</a></ins>
+										</ae:assetExists>
 									</f:if>
 								</td>
 							</tr>
