@@ -8,13 +8,13 @@
 	<div class="neos-history-info">
 		<f:if condition="{sites -> f:count()} > 1">
 			<form action="{f:uri.action(action: 'index')}" method="get">
-				<label for="site"><b>Site</b></label>
+				<label for="site"><b>{neos:backend.translate(id: 'site', package: 'TYPO3.Neos')}</b></label>
 				<f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
 				<br /><br />
 			</form>
 		</f:if>
 		<f:if condition="{node}">
-			<label><b>Page</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
+			<label><b>{neos:backend.translate(id: 'page', package: 'TYPO3.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
 			<f:render section="nodeLink" arguments="{event: firstEvent, site: site}" />
 		</f:if>
 	</div>
