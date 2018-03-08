@@ -37,7 +37,7 @@ class AssetExistsViewHelper extends AbstractViewHelper
     {
         try {
             $asset->getResource();
-        } catch(EntityNotFoundException $e) {
+        } catch (EntityNotFoundException $e) {
             return '';
         }
         return $this->renderChildren();
