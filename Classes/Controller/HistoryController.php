@@ -114,7 +114,8 @@ class HistoryController extends AbstractModuleController
             'nextPage' => $nextPage,
             'sites' => $sites,
             'site' => $site,
-            'node' => $node
+            'node' => $node,
+            'firstEvent' => $events[0]
         ]);
     }
 

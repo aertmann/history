@@ -7,6 +7,7 @@ AE.History.HistoryController.index = Template {
 	sites = ${sites}
 	site = ${site}
 	node = ${node}
+	firstEvent = ${firstEvent}
 
 	eventRenderer = AE.History:History.EventRenderer
 }

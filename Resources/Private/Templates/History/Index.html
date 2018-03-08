@@ -5,12 +5,19 @@
 
 <div class="neos-history">
 	<legend>{neos:backend.translate(id: 'history.messages.hereIsWhatHappenedRecentlyInNeos', source: 'Modules', package: 'TYPO3.Neos')}</legend>
-	<f:if condition="{sites -> f:count()} > 1">
-		<form action="{f:uri.action(action: 'index')}" method="get" class="neos-history-site-form">
-			<label for="site">Site</label>
-			<f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
-		</form>
-	</f:if>
+	<div class="neos-history-info">
+		<f:if condition="{sites -> f:count()} > 1">
+			<form action="{f:uri.action(action: 'index')}" method="get">
+				<label for="site"><b>Site</b></label>
+				<f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
+				<br /><br />
+			</form>
+		</f:if>
+		<f:if condition="{node}">
+			<label><b>Page</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
+			<f:render section="nodeLink" arguments="{event: firstEvent, site: site}" />
+		</f:if>
+	</div>
 	<f:if condition="{eventsByDate}">
 		<f:then>
 			<f:for each="{eventsByDate}" as="eventsOnSingleDay" iteration="iteration">
@@ -40,22 +47,13 @@
 <f:section name="eventElement">
 	<div class="neos-history-event">
 		<div class="neos-history-event-arrow"></div>
-		<h3 class="neos-history-event-title">
-
-			<f:if condition="{event.node}">
-				<f:then>
-					<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" additionalAttributes="{title: '{f:render(section: \'documentBreadcrumb\', arguments: {node: event.node})}'}" data="{'neos-toggle': 'tooltip'}">
-						<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
-					</f:link.action>
-					<neos:link.node node="{event.node}"><i class="icon-external-link" style="float:right"></i></neos:link.node>
-				</f:then>
-				<f:else>
-					<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" title="{neos:backend.translate(id: 'history.nodeRemovedInMeantime', source: 'Modules', package: 'TYPO3.Neos')}" data="{'neos-toggle': 'tooltip'}">
-						<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
-					</f:link.action>
-				</f:else>
-			</f:if>
-		</h3>
+		<f:if condition="{node}">
+			<f:else>
+				<h3 class="neos-history-event-title">
+					<f:render section="nodeLink" arguments="{_all}" />
+				</h3>
+			</f:else>
+		</f:if>
 		<div class="neos-history-event-content">
 			{content -> f:format.raw()}
 		</div>
@@ -156,6 +154,22 @@
 			</tr>
 		</f:for>
 	</table>
+</f:section>
+
+<f:section name="nodeLink">
+	<f:if condition="{event.node}">
+		<f:then>
+			<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" additionalAttributes="{title: '{f:render(section: \'documentBreadcrumb\', arguments: {node: event.node})}'}" data="{'neos-toggle': 'tooltip'}">
+				<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
+			</f:link.action>
+			<neos:link.node node="{event.node}"><i class="icon-external-link"></i></neos:link.node>
+		</f:then>
+		<f:else>
+			<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" title="{neos:backend.translate(id: 'history.nodeRemovedInMeantime', source: 'Modules', package: 'TYPO3.Neos')}" data="{'neos-toggle': 'tooltip'}">
+				<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
+			</f:link.action>
+		</f:else>
+	</f:if>
 </f:section>
 
 <f:section name="documentBreadcrumb">
