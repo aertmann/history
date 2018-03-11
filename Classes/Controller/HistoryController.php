@@ -115,7 +115,7 @@ class HistoryController extends AbstractModuleController
             'sites' => $sites,
             'site' => $site,
             'node' => $node,
-            'firstEvent' => $events[0]
+            'firstEvent' => current($events)
         ]);
     }
 
