@@ -32,7 +32,7 @@ function(
 		documentNodeIdentifier: null,
 		init: function() {
 			var selectedNode = NodeSelection.get('selectedNode');
-			if (NodeTypeService.isOfType(selectedNode, 'TYPO3.Neos:Document')) {
+			if (NodeTypeService.isOfType(selectedNode, 'Neos.Neos:Document')) {
 				this.set('historyLink', '/neos/management/history/?moduleArguments%5Bnode%5D=' + selectedNode.getAttribute('_identifier'));
 			}
 			this._super();

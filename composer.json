@@ -1,6 +1,6 @@
 {
 	"name": "aertmann/history",
-	"type": "typo3-flow-package",
+	"type": "neos-package",
 	"license": "MIT",
 	"description": "An improved history backend module for Neos",
 	"keywords": [ "history", "event-log", "neos" ],
@@ -11,7 +11,7 @@
 		}
 	],
 	"require": {
-		"typo3/neos": "~2.3"
+		"neos/neos": "^3.0"
 	},
 	"autoload": {
 		"psr-4": {

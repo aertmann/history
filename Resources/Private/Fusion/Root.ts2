@@ -1,4 +1,4 @@
-include: resource://TYPO3.TypoScript/Private/TypoScript/Root.ts2
+include: resource://Neos.Fusion/Private/Fusion/Root.fusion
 
 AE.History.HistoryController.index = Template {
 	templatePath = 'resource://AE.History/Private/Templates/History/Index.html'

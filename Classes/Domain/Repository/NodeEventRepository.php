@@ -1,20 +1,10 @@
 <?php
 namespace AE\History\Domain\Repository;
 
-/*
- * This file is part of the TYPO3.Neos package.
- *
- * (c) Contributors of the Neos Project - www.neos.io
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Persistence\QueryResultInterface;
-use TYPO3\Neos\EventLog\Domain\Model\NodeEvent;
-use TYPO3\Neos\EventLog\Domain\Repository\EventRepository;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Persistence\QueryResultInterface;
+use Neos\Neos\EventLog\Domain\Model\NodeEvent;
+use Neos\Neos\EventLog\Domain\Repository\EventRepository;
 
 /**
  * The repository for events

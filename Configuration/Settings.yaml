@@ -1,10 +1,10 @@
-TYPO3:
+Neos:
   Neos:
     modules:
       management:
         submodules:
           history:
-            controller: '\AE\History\Controller\HistoryController'
+            controller: \AE\History\Controller\HistoryController
             privilegeTarget: 'AE.History:BackendModule'
             additionalResources:
               styleSheets:
@@ -13,3 +13,14 @@ TYPO3:
     userInterface:
       requireJsPathMapping:
         'AE.History/Views': 'resource://AE.History/Public/JavaScript'
+
+  Flow:
+    security:
+      authentication:
+        providers:
+          'Neos.Neos:Backend':
+            requestPatterns:
+              'AE.History:Controllers':
+                pattern: 'ControllerObjectName'
+                patternOptions:
+                  controllerObjectNamePattern: 'AE\History\Controller\.*'

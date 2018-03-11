@@ -1,26 +1,16 @@
 <?php
 namespace AE\History\Controller;
 
-/*
- * This file is part of the TYPO3.Neos package.
- *
- * (c) Contributors of the Neos Project - www.neos.io
- *
- * This package is Open Source Software. For the full copyright and license
- * information, please view the LICENSE file which was distributed with this
- * source code.
- */
-
 use AE\History\Domain\Repository\NodeEventRepository;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\View\ViewInterface;
-use TYPO3\Flow\Security\Context;
-use TYPO3\Neos\Controller\Module\AbstractModuleController;
-use TYPO3\Neos\Domain\Repository\DomainRepository;
-use TYPO3\Neos\Domain\Repository\SiteRepository;
-use TYPO3\Neos\EventLog\Domain\Model\Event;
-use TYPO3\Neos\EventLog\Domain\Model\EventsOnDate;
-use TYPO3\TypoScript\View\TypoScriptView;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\View\ViewInterface;
+use Neos\Flow\Security\Context;
+use Neos\Neos\Controller\Module\AbstractModuleController;
+use Neos\Neos\Domain\Repository\DomainRepository;
+use Neos\Neos\Domain\Repository\SiteRepository;
+use Neos\Neos\EventLog\Domain\Model\Event;
+use Neos\Neos\EventLog\Domain\Model\EventsOnDate;
+use Neos\Fusion\View\FusionView;
 
 /**
  * Controller for the history module of Neos, displaying the timeline of changes.
@@ -54,7 +44,7 @@ class HistoryController extends AbstractModuleController
     /**
      * @var string
      */
-    protected $defaultViewObjectName = TypoScriptView::class;
+    protected $defaultViewObjectName = FusionView::class;
 
     /**
      * Show event overview.
@@ -90,7 +80,7 @@ class HistoryController extends AbstractModuleController
                 ->controllerContext
                 ->getUriBuilder()
                 ->setCreateAbsoluteUri(true)
-                ->uriFor('Index', ['offset' => $offset + $limit, 'site' => $site], 'History', 'TYPO3.Neos');
+                ->uriFor('Index', ['offset' => $offset + $limit, 'site' => $site], 'History', 'Neos.Neos');
         }
 
         $eventsByDate = array();
@@ -120,7 +110,7 @@ class HistoryController extends AbstractModuleController
     }
 
     /**
-     * Simply sets the TypoScript path pattern on the view.
+     * Simply sets the Fusion path pattern on the view.
      *
      * @param ViewInterface $view
      * @return void
@@ -128,6 +118,6 @@ class HistoryController extends AbstractModuleController
     protected function initializeView(ViewInterface $view)
     {
         parent::initializeView($view);
-        $view->setTypoScriptPathPattern('resource://AE.History/Private/TypoScript');
+        $view->setFusionPathPattern('resource://AE.History/Private/Fusion');
     }
 }

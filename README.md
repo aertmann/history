@@ -15,8 +15,8 @@ Additionally provides a link in the node info view for document nodes in the con
 
 Hides account creation/deletion events.
 
-Compatible with Neos 2.3+
+Compatible with Neos 3.x+
 
 ## Installation
 
-`composer require "aertmann/history:~1.0"`
+`composer require "aertmann/history:~2.0"`
