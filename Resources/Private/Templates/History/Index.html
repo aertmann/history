@@ -15,7 +15,10 @@
 		</f:if>
 		<f:if condition="{node}">
 			<label><b>{neos:backend.translate(id: 'page', package: 'TYPO3.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
-			<f:render section="nodeLink" arguments="{event: firstEvent, site: site}" />
+			<f:if condition="{firstEvent}">
+				<f:then><f:render section="nodeLink" arguments="{event: firstEvent, site: site}" /></f:then>
+				<f:else>{neos:backend.translate(id: 'unavailable', package: 'TYPO3.Neos')}</f:else>
+			</f:if>
 		</f:if>
 	</div>
 	<f:if condition="{eventsByDate}">

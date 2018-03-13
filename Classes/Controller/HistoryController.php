@@ -15,6 +15,7 @@ use AE\History\Domain\Repository\NodeEventRepository;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Mvc\View\ViewInterface;
 use TYPO3\Flow\Security\Context;
+use TYPO3\Neos\Controller\CreateContentContextTrait;
 use TYPO3\Neos\Controller\Module\AbstractModuleController;
 use TYPO3\Neos\Domain\Repository\DomainRepository;
 use TYPO3\Neos\Domain\Repository\SiteRepository;
@@ -27,6 +28,8 @@ use TYPO3\TypoScript\View\TypoScriptView;
  */
 class HistoryController extends AbstractModuleController
 {
+    use CreateContentContextTrait;
+
     /**
      * @Flow\Inject
      * @var NodeEventRepository
@@ -109,13 +112,26 @@ class HistoryController extends AbstractModuleController
             $eventsOnThisDay->add($event);
         }
 
+        $firstEvent = current($events);
+        if (!$firstEvent) {
+            $contentContext = $this->createContentContext('live');
+            $actualNode = $contentContext->getNodeByIdentifier($node);
+            if ($actualNode) {
+              $firstEvent = [
+                'nodeIdentifier' => $node,
+                'node' => $actualNode,
+                'data' => ['documentNodeType' => $actualNode->getNodeType()->getName(), 'documentNodeLabel' => $actualNode->getLabel()]
+              ];
+            }
+        }
+
         $this->view->assignMultiple([
             'eventsByDate' => $eventsByDate,
             'nextPage' => $nextPage,
             'sites' => $sites,
             'site' => $site,
             'node' => $node,
-            'firstEvent' => current($events)
+            'firstEvent' => $firstEvent
         ]);
     }
 
