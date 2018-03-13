@@ -16,12 +16,26 @@ $tightMargin: 4px;
 $wideMargin: 32px;
 
 .neos.neos-module.neos-module-management-history {
+	.neos-history {
+		&::after {
+			display: block;
+			content: "";
+			clear: both;
+		}
+	}
+
 	.neos-history-info {
 		float: left;
 
 		.neos-tooltip-inner {
 			white-space: nowrap;
 			max-width: none;
+		}
+
+		+ p {
+			width: 100%;
+			margin-top: 20px;
+			float: left;
 		}
 	}
 

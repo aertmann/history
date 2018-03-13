@@ -5,6 +5,7 @@ use AE\History\Domain\Repository\NodeEventRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Security\Context;
+use Neos\Neos\Controller\CreateContentContextTrait;
 use Neos\Neos\Controller\Module\AbstractModuleController;
 use Neos\Neos\Domain\Repository\DomainRepository;
 use Neos\Neos\Domain\Repository\SiteRepository;
@@ -17,6 +18,8 @@ use Neos\Fusion\View\FusionView;
  */
 class HistoryController extends AbstractModuleController
 {
+    use CreateContentContextTrait;
+
     /**
      * @Flow\Inject
      * @var NodeEventRepository
@@ -99,13 +102,26 @@ class HistoryController extends AbstractModuleController
             $eventsOnThisDay->add($event);
         }
 
+        $firstEvent = current($events);
+        if (!$firstEvent) {
+            $contentContext = $this->createContentContext('live');
+            $actualNode = $contentContext->getNodeByIdentifier($node);
+            if ($actualNode) {
+              $firstEvent = [
+                'nodeIdentifier' => $node,
+                'node' => $actualNode,
+                'data' => ['documentNodeType' => $actualNode->getNodeType()->getName(), 'documentNodeLabel' => $actualNode->getLabel()]
+              ];
+            }
+        }
+
         $this->view->assignMultiple([
             'eventsByDate' => $eventsByDate,
             'nextPage' => $nextPage,
             'sites' => $sites,
             'site' => $site,
             'node' => $node,
-            'firstEvent' => current($events)
+            'firstEvent' => $firstEvent
         ]);
     }
 
