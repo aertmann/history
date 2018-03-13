@@ -20,3 +20,14 @@ Compatible with Neos 3.x+
 ## Installation
 
 `composer require "aertmann/history:~2.0"`
+
+## Screenshots
+
+General overview with site selection
+![Screenshot of general overview](Resources/Private/Images/history.jpg "General overview")
+
+View of history for specific page
+![Screenshot of viewing specific page](Resources/Private/Images/specific-page.jpg "Specific page")
+
+Inspector link to history for specific page
+![Screenshot of inspector link to ](Resources/Private/Images/inspector.jpg "Inspector link")
