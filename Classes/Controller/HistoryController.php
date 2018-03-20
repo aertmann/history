@@ -4,6 +4,7 @@ namespace AE\History\Controller;
 use AE\History\Domain\Repository\NodeEventRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
+use Neos\Flow\Security\AccountRepository;
 use Neos\Flow\Security\Context;
 use Neos\Neos\Controller\CreateContentContextTrait;
 use Neos\Neos\Controller\Module\AbstractModuleController;
@@ -40,6 +41,12 @@ class HistoryController extends AbstractModuleController
 
     /**
      * @Flow\Inject
+     * @var AccountRepository
+     */
+    protected $accountRepository;
+
+    /**
+     * @Flow\Inject
      * @var Context
      */
     protected $securityContext;
@@ -56,9 +63,10 @@ class HistoryController extends AbstractModuleController
      * @param integer $limit
      * @param string $site
      * @param string $node
+     * @param string $account
      * @return void
      */
-    public function indexAction($offset = 0, $limit = 25, $site = null, $node = null)
+    public function indexAction($offset = 0, $limit = 25, $site = null, $node = null, $account = null)
     {
         $numberOfSites = 0;
         // In case a user can only access a single site, but more sites exists
@@ -73,7 +81,10 @@ class HistoryController extends AbstractModuleController
                 $site = $this->persistenceManager->getIdentifierByObject($domain->getSite());
             }
         }
-        $events = $this->nodeEventRepository->findRelevantEventsByWorkspace($offset, $limit + 1, 'live', $site, $node)->toArray();
+
+        $accounts = $this->accountRepository->findByAuthenticationProviderName('Neos.Neos:Backend')->toArray();
+
+        $events = $this->nodeEventRepository->findRelevantEventsByWorkspace($offset, $limit + 1, 'live', $site, $node, $account)->toArray();
 
         $nextPage = null;
         if (count($events) > $limit) {
@@ -120,6 +131,8 @@ class HistoryController extends AbstractModuleController
             'nextPage' => $nextPage,
             'sites' => $sites,
             'site' => $site,
+            'accounts' => $accounts,
+            'account' => $account,
             'node' => $node,
             'firstEvent' => $firstEvent
         ]);
