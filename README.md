@@ -15,7 +15,7 @@ Additionally provides a link in the node info view for document nodes in the con
 
 Hides account creation/deletion events.
 
-Compatible with Neos 3.x+
+Compatible with Neos 3.x-4.x
 
 ## Installation
 
