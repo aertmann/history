@@ -6,13 +6,19 @@
 <div class="neos-history">
 	<legend>{neos:backend.translate(id: 'history.messages.hereIsWhatHappenedRecentlyInNeos', source: 'Modules', package: 'Neos.Neos')}</legend>
 	<div class="neos-history-info">
-		<f:if condition="{sites -> f:count()} > 1">
-			<form action="{f:uri.action(action: 'index')}" method="get">
+		<form action="{f:uri.action(action: 'index')}" method="get">
+			<f:if condition="{sites -> f:count()} > 1">
 				<label for="site"><b>{neos:backend.translate(id: 'site', package: 'Neos.Neos')}</b></label>
 				<f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
 				<br /><br />
-			</form>
-		</f:if>
+			</f:if>
+
+			<f:if condition="{accounts -> f:count()} > 1">
+				<label for="account"><b>{neos:backend.translate(id: 'username', package: 'Neos.Neos')}</b></label>
+				<f:form.select name="moduleArguments[account]" id="account" value="{account}" options="{accounts}" optionLabelField="accountIdentifier" optionValueField="accountIdentifier" prependOptionValue="" prependOptionLabel="All" />
+				<br /><br />
+			</f:if>
+		</form>
 		<f:if condition="{node}">
 			<label><b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
 			<f:if condition="{firstEvent}">
@@ -198,7 +204,7 @@
 		var loadMore = $('.loadMore');
 		var nextPage = loadMore.data('neos-history-nextpage');
 		var historyContainer = $('.neos-history');
-		$('#site').change(function() {
+		$('#site,#account').change(function() {
 			this.form.submit();
 		});
 		$('button', loadMore).click(function() {

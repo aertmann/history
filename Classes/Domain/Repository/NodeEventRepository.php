@@ -3,6 +3,7 @@ namespace AE\History\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryResultInterface;
+use Neos\Neos\Domain\Model\User;
 use Neos\Neos\EventLog\Domain\Model\NodeEvent;
 use Neos\Neos\EventLog\Domain\Repository\EventRepository;
 
@@ -23,9 +24,10 @@ class NodeEventRepository extends EventRepository
      * @param string $workspaceName
      * @param string $siteIdentifier
      * @param string $nodeIdentifier
+     * @param string $accountIdentifier
      * @return QueryResultInterface
      */
-    public function findRelevantEventsByWorkspace($offset, $limit, $workspaceName, $siteIdentifier = null, $nodeIdentifier = null)
+    public function findRelevantEventsByWorkspace($offset, $limit, $workspaceName, $siteIdentifier = null, $nodeIdentifier = null, $accountIdentifier = null)
     {
         $query = $this->prepareRelevantEventsQuery();
         $query->getQueryBuilder()
@@ -42,6 +44,11 @@ class NodeEventRepository extends EventRepository
             $query->getQueryBuilder()
                 ->andWhere('e.nodeIdentifier = :nodeIdentifier')
                 ->setParameter('nodeIdentifier', $nodeIdentifier);
+        }
+        if($accountIdentifier) {
+            $query->getQueryBuilder()
+                ->andWhere('e.accountIdentifier = :accountIdentifier')
+                ->setParameter('accountIdentifier', $accountIdentifier);
         }
         $query->getQueryBuilder()->setFirstResult($offset);
         $query->getQueryBuilder()->setMaxResults($limit);
