@@ -14,6 +14,11 @@ Neos:
     userInterface:
       requireJsPathMapping:
         'AE.History/Views': 'resource://AE.History/Public/JavaScript'
+    Ui:
+      resources:
+        javascript:
+          'AE.History/Views/NodeInfoView':
+            resource: 'resource://AE.History/Public/JavaScript/NodeInfoView/Plugin.js'
 
   Flow:
     security:
