@@ -14,11 +14,12 @@
 			</f:if>
 
 			<f:if condition="{accounts -> f:count()} > 1">
-				<label for="account"><b>{neos:backend.translate(id: 'username', package: 'Neos.Neos')}</b></label>
+				<label for="account"><b>{neos:backend.translate(id: 'user.label', package: 'Neos.Neos', source: 'Modules')}</b></label>
 				<f:form.select name="moduleArguments[account]" id="account" value="{account}" options="{accounts}" optionLabelField="accountIdentifier" optionValueField="accountIdentifier" prependOptionValue="" prependOptionLabel="All" />
 				<br /><br />
 			</f:if>
 		</form>
+
 		<f:if condition="{node}">
 			<label><b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
 			<f:if condition="{firstEvent}">
@@ -204,7 +205,7 @@
 		var loadMore = $('.loadMore');
 		var nextPage = loadMore.data('neos-history-nextpage');
 		var historyContainer = $('.neos-history');
-		$('#site,#account').change(function() {
+		$('#site, #account').change(function() {
 			this.form.submit();
 		});
 		$('button', loadMore).click(function() {
