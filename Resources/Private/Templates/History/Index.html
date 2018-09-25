@@ -21,7 +21,7 @@
 		</form>
 
 		<f:if condition="{node}">
-			<label><b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove"></i></f:link.action></label>
+			<label><b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove fas fa-times"></i></f:link.action></label>
 			<f:if condition="{firstEvent}">
 				<f:then><f:render section="nodeLink" arguments="{event: firstEvent, site: site}" /></f:then>
 				<f:else>{neos:backend.translate(id: 'unavailable', package: 'Neos.Neos')}</f:else>
@@ -80,7 +80,7 @@
 			<f:if condition="{event.data.old}">
 				<ae:diff nodeEvent="{event}">
 					<f:if condition="{changes -> f:count()} > 0">
-						<span class="neos-history-event-details" data-neos-toggle="popover" data-placement="bottom" data-title="Modifications to <i class='{ae:nodeTypeIcon(nodeType: event.data.nodeType)}'></i> {event.data.nodeLabel}" data-html="true" data-content="{f:render(section: 'changes', arguments: {changes: changes}) -> f:format.htmlentities()}"><i class="icon-question-sign"></i></span>
+						<span class="neos-history-event-details" data-neos-toggle="popover" data-placement="bottom" data-title="Modifications to <i class='{ae:nodeTypeIcon(nodeType: event.data.nodeType)}'></i> {event.data.nodeLabel}" data-html="true" data-content="{f:render(section: 'changes', arguments: {changes: changes}) -> f:format.htmlentities()}"><i class="icon-question-sign fas fa-question-circle"></i></span>
 					</f:if>
 				</ae:diff>
 			</f:if>
@@ -180,7 +180,7 @@
 			<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" additionalAttributes="{title: '{f:render(section: \'documentBreadcrumb\', arguments: {node: event.node})}'}" data="{'neos-toggle': 'tooltip'}">
 				<i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
 			</f:link.action>
-			<neos:link.node node="{event.node}"><i class="icon-external-link"></i></neos:link.node>
+			<neos:link.node node="{event.node}"><i class="icon-external-link fas fa-external-link-alt"></i></neos:link.node>
 		</f:then>
 		<f:else>
 			<f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" title="{neos:backend.translate(id: 'history.nodeRemovedInMeantime', source: 'Modules', package: 'Neos.Neos')}" data="{'neos-toggle': 'tooltip'}">
