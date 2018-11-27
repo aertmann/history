@@ -4,15 +4,16 @@ namespace AE\History\Controller;
 use AE\History\Domain\Repository\NodeEventRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
+use Neos\Flow\Security\Account;
 use Neos\Flow\Security\AccountRepository;
 use Neos\Flow\Security\Context;
+use Neos\Fusion\View\FusionView;
 use Neos\Neos\Controller\CreateContentContextTrait;
 use Neos\Neos\Controller\Module\AbstractModuleController;
 use Neos\Neos\Domain\Repository\DomainRepository;
 use Neos\Neos\Domain\Repository\SiteRepository;
-use Neos\Neos\EventLog\Domain\Model\Event;
 use Neos\Neos\EventLog\Domain\Model\EventsOnDate;
-use Neos\Fusion\View\FusionView;
+use Neos\Neos\EventLog\Domain\Model\NodeEvent;
 
 /**
  * Controller for the history module of Neos, displaying the timeline of changes.
@@ -23,15 +24,14 @@ class HistoryController extends AbstractModuleController
 
     /**
      * @Flow\Inject
-     * @var NodeEventRepository
+     * @var AccountRepository
      */
-    protected $nodeEventRepository;
+    protected $accountRepository;
 
     /**
-     * @Flow\Inject
-     * @var SiteRepository
+     * @var string
      */
-    protected $siteRepository;
+    protected $defaultViewObjectName = FusionView::class;
 
     /**
      * @Flow\Inject
@@ -41,9 +41,9 @@ class HistoryController extends AbstractModuleController
 
     /**
      * @Flow\Inject
-     * @var AccountRepository
+     * @var NodeEventRepository
      */
-    protected $accountRepository;
+    protected $nodeEventRepository;
 
     /**
      * @Flow\Inject
@@ -52,25 +52,32 @@ class HistoryController extends AbstractModuleController
     protected $securityContext;
 
     /**
-     * @var string
+     * @Flow\Inject
+     * @var SiteRepository
      */
-    protected $defaultViewObjectName = FusionView::class;
+    protected $siteRepository;
 
     /**
      * Show event overview.
      *
-     * @param integer $offset
-     * @param integer $limit
+     * @param int $offset
+     * @param int $limit
      * @param string $site
      * @param string $node
      * @param string $account
+     *
      * @return void
      */
-    public function indexAction($offset = 0, $limit = 25, $site = null, $node = null, $account = null)
-    {
+    public function indexAction(
+        int $offset = 0,
+        int $limit = 25,
+        string $site = null,
+        string $node = null,
+        string $account = null
+    ) {
         $numberOfSites = 0;
         // In case a user can only access a single site, but more sites exists
-        $this->securityContext->withoutAuthorizationChecks(function () use(&$numberOfSites) {
+        $this->securityContext->withoutAuthorizationChecks(function () use (&$numberOfSites) {
             $numberOfSites = $this->siteRepository->countAll();
         });
         $sites = $this->siteRepository->findOnline();
@@ -82,59 +89,71 @@ class HistoryController extends AbstractModuleController
             }
         }
 
+        /** @var Account[] $accounts */
         $accounts = $this->accountRepository->findByAuthenticationProviderName('Neos.Neos:Backend')->toArray();
 
-        $events = $this->nodeEventRepository->findRelevantEventsByWorkspace($offset, $limit + 1, 'live', $site, $node, $account)->toArray();
+        /** @var NodeEvent[] $events */
+        $events = $this->nodeEventRepository
+            ->findRelevantEventsByWorkspace($offset, $limit + 1, 'live', $site, $node, $account)
+            ->toArray()
+        ;
 
         $nextPage = null;
         if (count($events) > $limit) {
             $events = array_slice($events, 0, $limit);
 
-            $nextPage = $this
-                ->controllerContext
+            $nextPage = $this->controllerContext
                 ->getUriBuilder()
                 ->setCreateAbsoluteUri(true)
-                ->uriFor('Index', ['offset' => $offset + $limit, 'site' => $site], 'History', 'Neos.Neos');
+                ->uriFor(
+                    'Index',
+                    ['offset' => $offset + $limit, 'site' => $site],
+                    'History',
+                    'Neos.Neos'
+                )
+            ;
         }
 
-        $eventsByDate = array();
+        /** @var EventsOnDate[] $eventsByDate */
+        $eventsByDate = [];
         foreach ($events as $event) {
             if ($event->getChildEvents()->count() === 0) {
                 continue;
             }
-            /* @var $event Event */
-            $day = $event->getTimestamp()->format('Y-m-d');
+            $timestamp = $event->getTimestamp();
+            $day = $timestamp->format('Y-m-d');
             if (!isset($eventsByDate[$day])) {
-                $eventsByDate[$day] = new EventsOnDate($event->getTimestamp());
+                $eventsByDate[$day] = new EventsOnDate($timestamp);
             }
 
-            /* @var $eventsOnThisDay EventsOnDate */
             $eventsOnThisDay = $eventsByDate[$day];
             $eventsOnThisDay->add($event);
         }
 
         $firstEvent = current($events);
-        if (!$firstEvent) {
-            $contentContext = $this->createContentContext('live');
-            $actualNode = $contentContext->getNodeByIdentifier($node);
-            if ($actualNode) {
-              $firstEvent = [
-                'nodeIdentifier' => $node,
-                'node' => $actualNode,
-                'data' => ['documentNodeType' => $actualNode->getNodeType()->getName(), 'documentNodeLabel' => $actualNode->getLabel()]
-              ];
+        if ($firstEvent === false) {
+            $actualNode = $this->createContentContext('live')->getNodeByIdentifier($node);
+            if ($actualNode !== null) {
+                $firstEvent = [
+                    'data' => [
+                        'documentNodeLabel' => $actualNode->getLabel(),
+                        'documentNodeType' => $actualNode->getNodeType()->getName(),
+                    ],
+                    'node' => $actualNode,
+                    'nodeIdentifier' => $node,
+                ];
             }
         }
 
         $this->view->assignMultiple([
-            'eventsByDate' => $eventsByDate,
-            'nextPage' => $nextPage,
-            'sites' => $sites,
-            'site' => $site,
-            'accounts' => $accounts,
             'account' => $account,
+            'accounts' => $accounts,
+            'eventsByDate' => $eventsByDate,
+            'firstEvent' => $firstEvent,
+            'nextPage' => $nextPage,
             'node' => $node,
-            'firstEvent' => $firstEvent
+            'site' => $site,
+            'sites' => $sites,
         ]);
     }
 
@@ -142,6 +161,7 @@ class HistoryController extends AbstractModuleController
      * Simply sets the Fusion path pattern on the view.
      *
      * @param ViewInterface $view
+     *
      * @return void
      */
     protected function initializeView(ViewInterface $view)
