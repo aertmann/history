@@ -6,12 +6,8 @@ use Neos\Flow\Annotations as Flow;
 use Neos\FluidAdaptor\Core\ViewHelper\AbstractViewHelper;
 use Neos\Media\Domain\Model\AssetInterface;
 
-/**
- *
- */
 class AssetExistsViewHelper extends AbstractViewHelper
 {
-
     /**
      * @var boolean
      */
@@ -21,15 +17,17 @@ class AssetExistsViewHelper extends AbstractViewHelper
      * Checks if an asset exists.
      *
      * @param AssetInterface $asset
+     *
      * @return string
      */
-    public function render(AssetInterface $asset)
+    public function render(AssetInterface $asset) : string
     {
         try {
             $asset->getResource();
         } catch (EntityNotFoundException $e) {
             return '';
         }
+
         return $this->renderChildren();
     }
 }

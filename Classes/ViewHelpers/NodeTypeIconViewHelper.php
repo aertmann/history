@@ -5,12 +5,8 @@ use Neos\Flow\Annotations as Flow;
 use Neos\FluidAdaptor\Core\ViewHelper\AbstractViewHelper;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 
-/**
- *
- */
 class NodeTypeIconViewHelper extends AbstractViewHelper
 {
-
     /**
      * @var boolean
      */
@@ -24,9 +20,10 @@ class NodeTypeIconViewHelper extends AbstractViewHelper
 
     /**
      * @param string $nodeType
+     *
      * @return string
      */
-    public function render($nodeType)
+    public function render(string $nodeType) : string
     {
         return $this->nodeTypeManager->getNodeType($nodeType)->getConfiguration('ui.icon');
     }
