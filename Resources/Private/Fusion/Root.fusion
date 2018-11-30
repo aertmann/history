@@ -1,115 +1,84 @@
 include: resource://Neos.Fusion/Private/Fusion/Root.fusion
+include: resource://Neos.Neos/Private/Fusion/Backend/History/Root.fusion
 
-AE.History.HistoryController.index = Template {
-    templatePath = 'resource://AE.History/Private/Templates/History/Index.html'
-    eventsByDate = ${eventsByDate}
-    nextPage = ${nextPage}
-    sites = ${sites}
-    site = ${site}
-    accounts = ${accounts}
+AE.History.HistoryController.index = AE.History:Template {
     account = ${account}
-    node = ${node}
+    accounts = ${accounts}
+    eventsByDate = ${eventsByDate}
     firstEvent = ${firstEvent}
+    nextPage = ${nextPage}
+    node = ${node}
+    site = ${site}
+    sites = ${sites}
 
-    eventRenderer = AE.History:History.EventRenderer
+    eventRenderer = Neos.Neos:History.EventRenderer
 }
 
-prototype(AE.History:History.EventRenderer) < prototype(Template) {
+prototype(AE.History:Template) < prototype(Neos.Fusion:Template) {
     templatePath = 'resource://AE.History/Private/Templates/History/Index.html'
+}
+
+prototype(Neos.Neos:History.EventRenderer).nodeEvent.type = 'AE.History:History.NodeEventRenderer'
+
+prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template) {
     sectionName = 'eventElement'
+
     event = ${event}
     node = ${node}
     site = ${site}
 
-    content = Array {
-        @context.documentEvents = ${Neos.Array.filter(event.childEvents, 'documentEvent')}
-        @context.contentEvents = ${Neos.Array.filterNegated(event.childEvents, 'documentEvent')}
+    content = Neos.Fusion:Array {
+        @context {
+            contentEvents = ${Neos.Array.filterNegated(event.childEvents, 'documentEvent')}
+            documentEvents = ${Neos.Array.filter(event.childEvents, 'documentEvent')}
+        }
 
-        documentEvents = Collection {
+        documentEvents = Neos.Fusion:Collection {
             collection = ${documentEvents}
-            itemName = 'subEvent'
+            itemName = 'event'
 
-            itemRenderer = Case {
+            itemRenderer = Neos.Fusion:Case {
                 default {
-                    condition = TRUE
-                    type = ${'AE.History:History.PublishedNode.' + subEvent.eventType}
+                    condition = true
+                    type = ${'Neos.Neos:History.PublishedNode.' + event.eventType}
                 }
             }
         }
 
-        contentChanged = AE.History:History.PublishedNode.ContentChanged {
-            event = ${event}
-            @if.hasContentEvents = ${Array.length(contentEvents) > 0}
-            @if.documentNotRemoved = ${documentEvents[0].eventType != 'Node.Removed'}
-            @if.notDetailedView = ${node == null}
-        }
+        content = Neos.Fusion:Case {
+            changed {
+                condition = ${node == null}
+                renderer = Neos.Neos:History.PublishedNode.ContentChanged {
+                    @if {
+                        documentNotRemoved = ${Array.first(documentEvents).eventType != 'Node.Removed'}
+                        hasContentEvents = ${Array.length(contentEvents) > 0}
+                    }
+                }
+            }
 
-        contentEvents = Collection {
-            collection = ${contentEvents}
-            itemName = 'subEvent'
-            @if.detailedView = ${node != null}
+            events {
+                condition = ${node != null}
+                renderer = Neos.Fusion:Collection {
+                    collection = ${contentEvents}
+                    itemName = 'event'
 
-            itemRenderer = Case {
-                default {
-                    condition = TRUE
-                    type = ${'AE.History:History.PublishedNode.' + subEvent.eventType}
+                    itemRenderer = Neos.Fusion:Case {
+                        default {
+                            condition = true
+                            type = ${'Neos.Neos:History.PublishedNode.' + event.eventType}
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-prototype(AE.History:History.PublishedNode.AbstractSubEvent) < prototype(Template) {
+prototype(Neos.Neos:History.PublishedNode.AbstractSubEvent) {
     templatePath = 'resource://AE.History/Private/Templates/History/Index.html'
     sectionName = 'subEventElement'
 
-    event = ${subEvent}
-    linkedNode = Template {
-        templatePath = 'resource://AE.History/Private/Templates/History/NodeLink.html'
-        event = ${event}
-    }
-    user = Template {
-        templatePath = 'resource://AE.History/Private/Templates/History/User.html'
-        event = ${event}
-    }
-}
+    @context.eventsOfMatchedType = ${[event]}
 
-prototype(AE.History:History.PublishedNode.Node.Adopt) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.adopted'
-    descriptionTranslationArguments = ${[this.user, Neos.Rendering.renderDimensions(subEvent.data.targetDimensions), String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), this.linkedNode]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.LabelChanged) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.renamed'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.oldLabel, subEvent.data.newLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.Added) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.added'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.nodeLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.Removed) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.removed'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.nodeLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.Copy) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.copied'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.nodeLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.Move) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.moved'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.nodeLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.Node.Updated) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.changed'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(subEvent.data.nodeType))), subEvent.data.nodeLabel]}
-}
-
-prototype(AE.History:History.PublishedNode.ContentChanged) < prototype(AE.History:History.PublishedNode.AbstractSubEvent) {
-    descriptionTranslationId = 'history.eventDescription.node.changedContent'
-    descriptionTranslationArguments = ${[this.user, String.firstLetterToLowerCase(I18n.translate(Neos.Rendering.labelForNodeType(event.data.nodeType))), event.data.nodeLabel]}
+    subEventType >
 }
