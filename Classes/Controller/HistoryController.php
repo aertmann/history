@@ -62,30 +62,39 @@ class HistoryController extends AbstractModuleController
      *
      * @param int $offset
      * @param int $limit
-     * @param string $site
-     * @param string $node
-     * @param string $account
+     * @param string|null $siteIdentifier
+     * @param string|null $nodeIdentifier
+     * @param string|null $accountIdentifier
      *
      * @return void
      */
     public function indexAction(
         int $offset = 0,
         int $limit = 25,
-        string $site = null,
-        string $node = null,
-        string $account = null
+        string $siteIdentifier = null,
+        string $nodeIdentifier = null,
+        string $accountIdentifier = null
     ) {
+        if ($accountIdentifier === '') {
+            $accountIdentifier = null;
+        }
+        if ($nodeIdentifier === '') {
+            $nodeIdentifier = null;
+        }
+        if ($siteIdentifier === '') {
+            $siteIdentifier = null;
+        }
+
         $numberOfSites = 0;
         // In case a user can only access a single site, but more sites exists
         $this->securityContext->withoutAuthorizationChecks(function () use (&$numberOfSites) {
             $numberOfSites = $this->siteRepository->countAll();
         });
         $sites = $this->siteRepository->findOnline();
-        if ($numberOfSites > 1 && $site === null) {
+        if ($numberOfSites > 1 && $siteIdentifier === null) {
             $domain = $this->domainRepository->findOneByActiveRequest();
-            // Set active asset collection to the current site's asset collection, if it has one, on the first view if a matching domain is found
-            if ($domain !== null && $domain->getSite()) {
-                $site = $this->persistenceManager->getIdentifierByObject($domain->getSite());
+            if ($domain !== null) {
+                $siteIdentifier = $this->persistenceManager->getIdentifierByObject($domain->getSite());
             }
         }
 
@@ -94,7 +103,14 @@ class HistoryController extends AbstractModuleController
 
         /** @var NodeEvent[] $events */
         $events = $this->nodeEventRepository
-            ->findRelevantEventsByWorkspace($offset, $limit + 1, 'live', $site, $node, $account)
+            ->findRelevantEventsByWorkspace(
+                $offset,
+                $limit + 1,
+                'live',
+                $siteIdentifier,
+                $nodeIdentifier,
+                $accountIdentifier
+            )
             ->toArray()
         ;
 
@@ -107,7 +123,7 @@ class HistoryController extends AbstractModuleController
                 ->setCreateAbsoluteUri(true)
                 ->uriFor(
                     'Index',
-                    ['offset' => $offset + $limit, 'site' => $site],
+                    ['offset' => $offset + $limit, 'siteIdentifier' => $siteIdentifier],
                     'History',
                     'Neos.Neos'
                 )
@@ -132,27 +148,27 @@ class HistoryController extends AbstractModuleController
 
         $firstEvent = current($events);
         if ($firstEvent === false) {
-            $actualNode = $this->createContentContext('live')->getNodeByIdentifier($node);
-            if ($actualNode !== null) {
+            $node = $this->createContentContext('live')->getNodeByIdentifier($nodeIdentifier);
+            if ($node !== null) {
                 $firstEvent = [
                     'data' => [
-                        'documentNodeLabel' => $actualNode->getLabel(),
-                        'documentNodeType' => $actualNode->getNodeType()->getName(),
+                        'documentNodeLabel' => $node->getLabel(),
+                        'documentNodeType' => $node->getNodeType()->getName(),
                     ],
-                    'node' => $actualNode,
-                    'nodeIdentifier' => $node,
+                    'node' => $node,
+                    'nodeIdentifier' => $nodeIdentifier,
                 ];
             }
         }
 
         $this->view->assignMultiple([
-            'account' => $account,
+            'accountIdentifier' => $accountIdentifier,
             'accounts' => $accounts,
             'eventsByDate' => $eventsByDate,
             'firstEvent' => $firstEvent,
             'nextPage' => $nextPage,
-            'node' => $node,
-            'site' => $site,
+            'nodeIdentifier' => $nodeIdentifier,
+            'siteIdentifier' => $siteIdentifier,
             'sites' => $sites,
         ]);
     }
