@@ -19,7 +19,6 @@
                     optionLabelField="name"
                     options="{sites}"
                     prependOptionLabel="All"
-                    prependOptionValue=""
                     value="{site}"
                 />
                 <br/>
@@ -39,7 +38,6 @@
                     optionValueField="accountIdentifier"
                     options="{accounts}"
                     prependOptionLabel="All"
-                    prependOptionValue=""
                     value="{account}"
                 />
                 <br/>
@@ -325,24 +323,30 @@
 
 <script>
     $(function () {
-        var loadMore = $('.loadMore');
-        var nextPage = loadMore.data('neos-history-nextpage');
-        var historyContainer = $('.neos-history');
+        var $historyContainer,
+            $loadMore,
+            nextPage
+        ;
+
         $('#site, #account').change(function () {
             this.form.submit();
         });
-        $('button', loadMore).click(function () {
+
+        $historyContainer = $('.neos-history');
+        $loadMore = $('.loadMore');
+        nextPage = $loadMore.data('neos-history-nextpage');
+        $('button', $loadMore).click(function () {
             $.ajax({
                 url: nextPage,
                 type: 'GET',
             }).done(function (data) {
                 nextPage = $(data).find('.loadMore').data('neos-history-nextpage');
                 if (typeof nextPage === 'undefined') {
-                    $('.loadMore').hide();
+                    $loadMore.hide();
                 }
 
-                var days = $(data).find('.neos-history-day');
-                days.each(function (index, day) {
+                var $days = $(data).find('.neos-history-day');
+                $days.each(function (index, day) {
                     var date = $(day).data('date');
                     var $existingDay = $('[data-date="' + date + '"]');
 
@@ -351,7 +355,7 @@
                             $existingDay.find('.neos-history-events').append(event);
                         });
                     } else {
-                        historyContainer.append(day);
+                        $historyContainer.append(day);
                     }
                     initializeBootstrap();
                 });
@@ -374,9 +378,11 @@
                         $('[data-neos-toggle]').not(this).popover('hide');
                     });
                     $('body').on('click', function (e) {
-                        if ($(e.target).data('neos-toggle') !== 'popover' &&
-                            $(e.target).parents('[data-neos-toggle="popover"]').length === 0 &&
-                            $(e.target).parents('.neos-popover.neos-in').length === 0) {
+                        let $target = $(e.target);
+                        if ($target.data('neos-toggle') !== 'popover' &&
+                            $target.parents('[data-neos-toggle="popover"]').length === 0 &&
+                            $target.parents('.neos-popover.neos-in').length === 0
+                        ) {
                             $('[data-neos-toggle]').popover('hide');
                         }
                     });
