@@ -135,7 +135,12 @@ class HistoryController extends AbstractModuleController
                 ->setCreateAbsoluteUri(true)
                 ->uriFor(
                     'Index',
-                    ['offset' => $offset + $limit, 'siteIdentifier' => $siteIdentifier],
+                    [
+                        'accountIdentifier' => $accountIdentifier,
+                        'nodeIdentifier' => $nodeIdentifier,
+                        'offset' => $offset + $limit,
+                        'siteIdentifier' => $siteIdentifier,
+                    ],
                     'History',
                     'Neos.Neos'
                 )
