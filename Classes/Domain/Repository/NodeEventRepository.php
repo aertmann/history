@@ -18,41 +18,52 @@ class NodeEventRepository extends EventRepository
     /**
      * Find all events which are "top-level" and in a given workspace (or are not NodeEvents)
      *
-     * @param integer $offset
-     * @param integer $limit
+     * @param int $offset
+     * @param int $limit
      * @param string $workspaceName
      * @param string $siteIdentifier
      * @param string $nodeIdentifier
      * @param string $accountIdentifier
+     *
      * @return QueryResultInterface
      */
-    public function findRelevantEventsByWorkspace($offset, $limit, $workspaceName, $siteIdentifier = null, $nodeIdentifier = null, $accountIdentifier = null)
-    {
+    public function findRelevantEventsByWorkspace(
+        $offset,
+        $limit,
+        $workspaceName,
+        string $siteIdentifier = null,
+        string $nodeIdentifier = null,
+        string $accountIdentifier = null
+    ) : QueryResultInterface {
         $query = $this->prepareRelevantEventsQuery();
-        $query->getQueryBuilder()
+        $queryBuilder = $query->getQueryBuilder();
+        $queryBuilder
             ->andWhere('e.workspaceName = :workspaceName AND e.eventType = :eventType')
             ->setParameter('workspaceName', $workspaceName)
-            ->setParameter('eventType', 'Node.Published');
-        if ($siteIdentifier) {
+            ->setParameter('eventType', 'Node.Published')
+        ;
+        if ($siteIdentifier !== null) {
             $siteCondition = '%' . trim(json_encode(['site' => $siteIdentifier], JSON_PRETTY_PRINT), "{}\n\t ") . '%';
-            $query->getQueryBuilder()
+            $queryBuilder
                 ->andWhere('NEOSCR_TOSTRING(e.data) LIKE :site')
-                ->setParameter('site', $siteCondition);
+                ->setParameter('site', $siteCondition)
+            ;
         }
-        if ($nodeIdentifier) {
-            $query->getQueryBuilder()
+        if ($nodeIdentifier !== null) {
+            $queryBuilder
                 ->andWhere('e.nodeIdentifier = :nodeIdentifier')
-                ->setParameter('nodeIdentifier', $nodeIdentifier);
+                ->setParameter('nodeIdentifier', $nodeIdentifier)
+            ;
         }
-        if ($accountIdentifier) {
-            $query->getQueryBuilder()
+        if ($accountIdentifier !== null) {
+            $queryBuilder
                 ->andWhere('e.accountIdentifier = :accountIdentifier')
-                ->setParameter('accountIdentifier', $accountIdentifier);
+                ->setParameter('accountIdentifier', $accountIdentifier)
+            ;
         }
-        $query->getQueryBuilder()->setFirstResult($offset);
-        $query->getQueryBuilder()->setMaxResults($limit);
+        $queryBuilder->setFirstResult($offset);
+        $queryBuilder->setMaxResults($limit);
 
         return $query->execute();
     }
-
 }

@@ -1,6 +1,8 @@
 <?php
 namespace AE\History\ViewHelpers;
 
+use Neos\ContentRepository\Domain\Model\NodeType;
+use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Diff\Diff;
 use Neos\Diff\Renderer\Html\HtmlArrayRenderer;
 use Neos\Flow\Annotations as Flow;
@@ -8,15 +10,9 @@ use Neos\FluidAdaptor\Core\ViewHelper\AbstractViewHelper;
 use Neos\Media\Domain\Model\AssetInterface;
 use Neos\Media\Domain\Model\ImageInterface;
 use Neos\Neos\EventLog\Domain\Model\NodeEvent;
-use Neos\ContentRepository\Domain\Model\NodeType;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 
-/**
- *
- */
 class DiffViewHelper extends AbstractViewHelper
 {
-
     /**
      * @var boolean
      */
@@ -33,9 +29,10 @@ class DiffViewHelper extends AbstractViewHelper
      * with meta information, in an array.
      *
      * @param NodeEvent $nodeEvent
+     *
      * @return string
      */
-    public function render(NodeEvent $nodeEvent)
+    public function render(NodeEvent $nodeEvent) : string
     {
         $data = $nodeEvent->getData();
         $old = $data['old'];
@@ -46,7 +43,11 @@ class DiffViewHelper extends AbstractViewHelper
         $renderer = new HtmlArrayRenderer();
         $changes = [];
         foreach ($new as $propertyName => $changedPropertyValue) {
-            if (($old === null && empty($changedPropertyValue)) || (isset($changeNodePropertiesDefaults[$propertyName]) && $changedPropertyValue === $changeNodePropertiesDefaults[$propertyName])) {
+            if (($old === null && empty($changedPropertyValue))
+                || (isset($changeNodePropertiesDefaults[$propertyName])
+                    && $changedPropertyValue === $changeNodePropertiesDefaults[$propertyName]
+                )
+            ) {
                 continue;
             }
 
@@ -56,37 +57,48 @@ class DiffViewHelper extends AbstractViewHelper
                 $originalSlimmedDownContent = $this->renderSlimmedDownContent($originalPropertyValue);
                 $changedSlimmedDownContent = $this->renderSlimmedDownContent($changedPropertyValue);
 
-                $diff = new Diff(explode("\n", $originalSlimmedDownContent), explode("\n", $changedSlimmedDownContent), ['context' => 1]);
+                $diff = new Diff(
+                    explode("\n", $originalSlimmedDownContent),
+                    explode("\n", $changedSlimmedDownContent),
+                    ['context' => 1]
+                );
+                /** @var array $diffArray */
                 $diffArray = $diff->render($renderer);
                 $this->postProcessDiffArray($diffArray);
-                if (count($diffArray) > 0) {
+                if ($diffArray !== []) {
                     $changes[$propertyName] = [
-                        'type' => 'text',
+                        'diff' => $diffArray,
                         'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
-                        'diff' => $diffArray
+                        'type' => 'text',
                     ];
                 }
-            } elseif ($originalPropertyValue instanceof ImageInterface || $changedPropertyValue instanceof ImageInterface) {
+            } elseif ($originalPropertyValue instanceof ImageInterface
+                || $changedPropertyValue instanceof ImageInterface
+            ) {
                 $changes[$propertyName] = [
+                    'changed' => $changedPropertyValue,
+                    'original' => $originalPropertyValue,
+                    'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
                     'type' => 'image',
-                    'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
-                    'original' => $originalPropertyValue,
-                    'changed' => $changedPropertyValue
                 ];
-            } elseif ($originalPropertyValue instanceof AssetInterface || $changedPropertyValue instanceof AssetInterface) {
+            } elseif ($originalPropertyValue instanceof AssetInterface
+                || $changedPropertyValue instanceof AssetInterface
+            ) {
                 $changes[$propertyName] = [
-                    'type' => 'asset',
-                    'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
+                    'changed' => $changedPropertyValue,
                     'original' => $originalPropertyValue,
-                    'changed' => $changedPropertyValue
+                    'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
+                    'type' => 'asset',
                 ];
-            } elseif ($originalPropertyValue instanceof \DateTime && $changedPropertyValue instanceof \DateTime) {
+            } elseif ($originalPropertyValue instanceof \DateTimeInterface
+                && $changedPropertyValue instanceof \DateTimeInterface
+            ) {
                 if ($changedPropertyValue->getTimestamp() !== $originalPropertyValue->getTimestamp()) {
                     $changes[$propertyName] = [
-                        'type' => 'datetime',
-                        'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
+                        'changed' => $changedPropertyValue,
                         'original' => $originalPropertyValue,
-                        'changed' => $changedPropertyValue
+                        'propertyLabel' => $this->getPropertyLabel($propertyName, $nodeType),
+                        'type' => 'datetime',
                     ];
                 }
             }
@@ -102,17 +114,12 @@ class DiffViewHelper extends AbstractViewHelper
      *
      * @param string $propertyName
      * @param NodeType $nodeType
+     *
      * @return string
      */
-    protected function getPropertyLabel($propertyName, $nodeType)
+    protected function getPropertyLabel(string $propertyName, NodeType $nodeType) : string
     {
-        $properties = $nodeType->getProperties();
-        if (!isset($properties[$propertyName]) ||
-            !isset($properties[$propertyName]['ui']['label'])
-        ) {
-            return $propertyName;
-        }
-        return $properties[$propertyName]['ui']['label'];
+        return $nodeType->getProperties()[$propertyName]['ui']['label'] ?? $propertyName;
     }
 
     /**
@@ -124,16 +131,17 @@ class DiffViewHelper extends AbstractViewHelper
      * here for the time being. Once we start displaying diffs elsewhere, we should refactor the diff rendering part.
      *
      * @param mixed $propertyValue
+     *
      * @return string
      */
-    protected function renderSlimmedDownContent($propertyValue)
+    protected function renderSlimmedDownContent($propertyValue) : string
     {
         $content = '';
         if (is_string($propertyValue)) {
-            $contentSnippet = preg_replace('/<br[^>]*>/', "\n", $propertyValue);
-            $contentSnippet = preg_replace('/<[^>]*>/', ' ', $contentSnippet);
-            $contentSnippet = str_replace('&nbsp;', ' ', $contentSnippet);
-            $content = trim(preg_replace('/ {2,}/', ' ', $contentSnippet));
+            $contentSnippet = str_replace('&nbsp;', ' ', $propertyValue);
+            $contentSnippet = preg_replace('/<br[^>]*>/', "\n", $contentSnippet);
+            $contentSnippet = preg_replace(['/<[^>]*>/', '/ {2,}/'], ' ', $contentSnippet);
+            $content = trim($contentSnippet);
         }
         return $content;
     }
@@ -146,6 +154,7 @@ class DiffViewHelper extends AbstractViewHelper
      * do that in these cases.
      *
      * @param array $diffArray
+     *
      * @return void
      */
     protected function postProcessDiffArray(array &$diffArray)
