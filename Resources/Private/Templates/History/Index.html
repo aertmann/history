@@ -1,55 +1,109 @@
-{namespace neos=Neos\Neos\ViewHelpers}
-{namespace m=Neos\Media\ViewHelpers}
-{namespace fusion=Neos\Fusion\ViewHelpers}
 {namespace ae=AE\History\ViewHelpers}
+{namespace fusion=Neos\Fusion\ViewHelpers}
+{namespace m=Neos\Media\ViewHelpers}
+{namespace neos=Neos\Neos\ViewHelpers}
 
 <div class="neos-history">
-    <legend>{neos:backend.translate(id: 'history.messages.hereIsWhatHappenedRecentlyInNeos', source: 'Modules', package: 'Neos.Neos')}</legend>
+    <legend>{neos:backend.translate(
+        id: 'history.messages.hereIsWhatHappenedRecentlyInNeos',
+        source: 'Modules',
+        package: 'Neos.Neos'
+    )}</legend>
     <div class="neos-history-info">
         <form action="{f:uri.action(action: 'index')}" method="get">
             <f:if condition="{sites -> f:count()} > 1">
                 <label for="site"><b>{neos:backend.translate(id: 'site', package: 'Neos.Neos')}</b></label>
-                <f:form.select name="moduleArguments[site]" id="site" value="{site}" options="{sites}" optionLabelField="name" prependOptionValue="" prependOptionLabel="All" />
-                <br /><br />
+                <f:form.select
+                    id="site"
+                    name="moduleArguments[site]"
+                    optionLabelField="name"
+                    options="{sites}"
+                    prependOptionLabel="All"
+                    value="{site}"
+                />
+                <br/>
+                <br/>
             </f:if>
 
             <f:if condition="{accounts -> f:count()} > 1">
-                <label for="account"><b>{neos:backend.translate(id: 'user.label', package: 'Neos.Neos', source: 'Modules')}</b></label>
-                <f:form.select name="moduleArguments[account]" id="account" value="{account}" options="{accounts}" optionLabelField="accountIdentifier" optionValueField="accountIdentifier" prependOptionValue="" prependOptionLabel="All" />
-                <br /><br />
+                <label for="account"><b>{neos:backend.translate(
+                    id: 'user.label',
+                    package: 'Neos.Neos',
+                    source: 'Modules'
+                )}</b></label>
+                <f:form.select
+                    id="account"
+                    name="moduleArguments[account]"
+                    optionLabelField="accountIdentifier"
+                    optionValueField="accountIdentifier"
+                    options="{accounts}"
+                    prependOptionLabel="All"
+                    value="{account}"
+                />
+                <br/>
+                <br/>
             </f:if>
         </form>
 
         <f:if condition="{node}">
-            <label><b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b> <f:link.action action="index" arguments="{site: site}"><i class="icon-remove fas fa-times"></i></f:link.action></label>
+            <label>
+                <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
+                <f:link.action action="index" arguments="{site: site}">
+                    <i class="icon-remove fas fa-times"></i>
+                </f:link.action>
+            </label>
             <f:if condition="{firstEvent}">
-                <f:then><f:render section="nodeLink" arguments="{event: firstEvent, site: site}" /></f:then>
+                <f:then><f:render section="nodeLink" arguments="{event: firstEvent, site: site}"/></f:then>
                 <f:else>{neos:backend.translate(id: 'unavailable', package: 'Neos.Neos')}</f:else>
             </f:if>
         </f:if>
     </div>
+
     <f:if condition="{eventsByDate}">
         <f:then>
             <f:for each="{eventsByDate}" as="eventsOnSingleDay" iteration="iteration">
                 <div class="neos-history-day" data-date="{eventsOnSingleDay.day -> f:format.date(format: 'dmy')}">
                     <div class="neos-history-date">
-                        <div class="neos-history-date-inner" title="{eventsOnSingleDay.day -> f:format.date(format: 'Y')}">{eventsOnSingleDay.day -> f:format.date(format: 'M d')}</div>
+                        <div
+                            class="neos-history-date-inner"
+                            title="{eventsOnSingleDay.day -> f:format.date(format: 'Y')}"
+                        >
+                            {eventsOnSingleDay.day -> f:format.date(format: 'M d')}
+                        </div>
                     </div>
+
                     <div class="neos-history-events neos-history-alignment">
-                        <f:groupedFor each="{eventsOnSingleDay.events}" as="eventsByTime" groupBy="timestamp" groupKey="timestamp">
+                        <f:groupedFor
+                            each="{eventsOnSingleDay.events}"
+                            as="eventsByTime"
+                            groupBy="timestamp"
+                            groupKey="timestamp"
+                        >
                             <div class="neos-history-date">
-                                <div class="neos-history-date-inner" title="{timestamp -> f:format.date(format: 'H:i:s')}">{timestamp -> f:format.date(format: 'H:i')}</div>
+                                <div
+                                    class="neos-history-date-inner"
+                                    title="{timestamp -> f:format.date(format: 'H:i:s')}"
+                                >
+                                    {timestamp -> f:format.date(format: 'H:i')}
+                                </div>
                             </div>
+
                             <f:for each="{eventsByTime}" as="event">
-                                <fusion:render path="eventRenderer" context="{event: event, node: node, site: site}" />
+                                <fusion:render
+                                    path="eventRenderer"
+                                    context="{event: event, node: node, site: site}"
+                                />
                             </f:for>
                         </f:groupedFor>
                     </div>
                 </div>
             </f:for>
         </f:then>
+
         <f:else>
-            <p>{neos:backend.translate(id: 'history.messages.emptyHistory', source: 'Modules', package: 'Neos.Neos')}</p>
+            <p>
+                {neos:backend.translate(id: 'history.messages.emptyHistory', source: 'Modules', package: 'Neos.Neos')}
+            </p>
         </f:else>
     </f:if>
 </div>
@@ -60,7 +114,7 @@
         <f:if condition="{node}">
             <f:else>
                 <h3 class="neos-history-event-title">
-                    <f:render section="nodeLink" arguments="{_all}" />
+                    <f:render section="nodeLink" arguments="{_all}"/>
                 </h3>
             </f:else>
         </f:if>
@@ -72,15 +126,37 @@
 
 <f:section name="subEventElement">
     <div class="neos-history-sub-event" id="{f:format.identifier(value: event)}">
-        <div class="neos-history-event-user" title="{event.accountIdentifier -> neos:backend.userInitials(format: 'fullName')}">
+        <div
+            class="neos-history-event-user"
+            title="{event.accountIdentifier -> neos:backend.userInitials(format: 'fullName')}"
+        >
             {event.accountIdentifier -> neos:backend.userInitials()}
         </div>
+
         <div class="neos-history-event-description">
-            {neos:backend.translate(id: descriptionTranslationId, source: 'Modules', package: 'Neos.Neos', arguments: descriptionTranslationArguments) -> f:format.raw()}
+            {neos:backend.translate(
+                id: descriptionTranslationId,
+                source: 'Modules',
+                package: 'Neos.Neos',
+                arguments: descriptionTranslationArguments
+            ) -> f:format.raw()}
+
             <f:if condition="{event.data.old}">
                 <ae:diff nodeEvent="{event}">
                     <f:if condition="{changes -> f:count()} > 0">
-                        <span class="neos-history-event-details" data-neos-toggle="popover" data-placement="bottom" data-title="Modifications to <i class='{ae:nodeTypeIcon(nodeType: event.data.nodeType)}'></i> {event.data.nodeLabel}" data-html="true" data-content="{f:render(section: 'changes', arguments: {changes: changes}) -> f:format.htmlentities()}"><i class="icon-question-sign fas fa-question-circle"></i></span>
+                        <span
+                            class="neos-history-event-details"
+                            data-neos-toggle="popover"
+                            data-placement="bottom"
+                            data-title="Modifications to <i class='{ae:nodeTypeIcon(
+                                nodeType: event.data.nodeType
+                            )}'></i> {event.data.nodeLabel}"
+                            data-html="true"
+                            data-content="{f:render(
+                                section: 'changes',
+                                arguments: {changes: changes}
+                            ) -> f:format.htmlentities()}"
+                        ><i class="icon-question-sign fas fa-question-circle"></i></span>
                     </f:if>
                 </ae:diff>
             </f:if>
@@ -94,80 +170,106 @@
             <tr>
                 <th colspan="3">{neos:backend.translate(id: change.propertyLabel)}</th>
             </tr>
+
             <tr>
                 <td colspan="3">
-                    <f:if condition="{change.type} == 'text'">
-                        <table>
-                            <f:for each="{change.diff}" key="index" as="blocks">
-                                <f:for each="{blocks}" as="block">
-                                    <tr>
-                                        <td>
-                                            <f:for each="{block.base.lines}" as="line">
-                                                {line -> f:format.raw()}
-                                            </f:for>
-                                        </td>
-                                        <td>
-                                            <f:for each="{block.changed.lines}" as="line">
-                                                {line -> f:format.raw()}
-                                            </f:for>
-                                        </td>
-                                    </tr>
+                    <f:switch expression="{change.type}">
+                        <f:case value="text">
+                            <table>
+                                <f:for each="{change.diff}" key="index" as="blocks">
+                                    <f:for each="{blocks}" as="block">
+                                        <tr>
+                                            <td>
+                                                <f:for each="{block.base.lines}" as="line">
+                                                    {line -> f:format.raw()}
+                                                </f:for>
+                                            </td>
+                                            <td>
+                                                <f:for each="{block.changed.lines}" as="line">
+                                                    {line -> f:format.raw()}
+                                                </f:for>
+                                            </td>
+                                        </tr>
+                                    </f:for>
                                 </f:for>
-                            </f:for>
-                        </table>
-                    </f:if>
-                    <f:if condition="{change.type} == 'image'">
-                        <table>
-                            <tr>
-                                <td>
-                                    <f:if condition="{change.original}">
-                                        <ae:assetExists asset="{change.original}">
-                                            <m:image image="{change.original}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt="" />
-                                        </ae:assetExists>
-                                    </f:if>
-                                </td>
-                                <td>
-                                    <f:if condition="{change.changed}">
-                                        <ae:assetExists asset="{change.changed}">
-                                            <m:image image="{change.changed}" allowCropping="false" maximumWidth="500" maximumHeight="500" alt="" />
-                                        </ae:assetExists>
-                                    </f:if>
-                                </td>
-                            </tr>
-                        </table>
-                    </f:if>
-                    <f:if condition="{change.type} == 'asset'">
-                        <table>
-                            <tr>
-                                <td>
-                                    <f:if condition="{change.original}">
-                                        <ae:assetExists asset="{change.original}">
-                                            <del><a href="{f:uri.resource(resource: change.original.resource)}">{change.original.resource.filename}</a></del>
-                                        </ae:assetExists>
-                                    </f:if>
-                                </td>
-                                <td>
-                                    <f:if condition="{change.changed}">
-                                        <ae:assetExists asset="{change.changed}">
-                                            <ins><a href="{f:uri.resource(resource: change.changed.resource)}">{change.changed.resource.filename}</a></ins>
-                                        </ae:assetExists>
-                                    </f:if>
-                                </td>
-                            </tr>
-                        </table>
-                    </f:if>
-                    <f:if condition="{change.type} == 'datetime'">
-                        <table>
-                            <tr>
-                                <td>
-                                    <f:format.date format="d.m.Y H:i:s" date="{change.original}" />
-                                </td>
-                                <td>
-                                    <f:format.date format="d.m.Y H:i:s" date="{change.changed}" />
-                                </td>
-                            </tr>
-                        </table>
-                    </f:if>
+                            </table>
+                        </f:case>
+
+                        <f:case value="image">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <f:if condition="{change.original}">
+                                            <ae:assetExists asset="{change.original}">
+                                                <m:image
+                                                    image="{change.original}"
+                                                    allowCropping="false"
+                                                    maximumWidth="500"
+                                                    maximumHeight="500"
+                                                    alt=""
+                                                />
+                                            </ae:assetExists>
+                                        </f:if>
+                                    </td>
+                                    <td>
+                                        <f:if condition="{change.changed}">
+                                            <ae:assetExists asset="{change.changed}">
+                                                <m:image
+                                                    image="{change.changed}"
+                                                    allowCropping="false"
+                                                    maximumWidth="500"
+                                                    maximumHeight="500"
+                                                    alt=""
+                                                />
+                                            </ae:assetExists>
+                                        </f:if>
+                                    </td>
+                                </tr>
+                            </table>
+                        </f:case>
+
+                        <f:case value="asset">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <f:if condition="{change.original}">
+                                            <ae:assetExists asset="{change.original}">
+                                                <del>
+                                                    <a href="{f:uri.resource(resource: change.original.resource)}">
+                                                        {change.original.resource.filename}
+                                                    </a>
+                                                </del>
+                                            </ae:assetExists>
+                                        </f:if>
+                                    </td>
+                                    <td>
+                                        <f:if condition="{change.changed}">
+                                            <ae:assetExists asset="{change.changed}">
+                                                <ins>
+                                                    <a href="{f:uri.resource(resource: change.changed.resource)}">
+                                                        {change.changed.resource.filename}
+                                                    </a>
+                                                </ins>
+                                            </ae:assetExists>
+                                        </f:if>
+                                    </td>
+                                </tr>
+                            </table>
+                        </f:case>
+
+                        <f:case value="datetime">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <f:format.date format="d.m.Y H:i:s" date="{change.original}"/>
+                                    </td>
+                                    <td>
+                                        <f:format.date format="d.m.Y H:i:s" date="{change.changed}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </f:case>
+                    </f:switch>
                 </td>
             </tr>
         </f:for>
@@ -177,13 +279,30 @@
 <f:section name="nodeLink">
     <f:if condition="{event.node}">
         <f:then>
-            <f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" additionalAttributes="{title: '{f:render(section: \'documentBreadcrumb\', arguments: {node: event.node})}'}" data="{'neos-toggle': 'tooltip'}">
+            <f:link.action
+                action="index"
+                arguments="{node: event.nodeIdentifier, site: site}"
+                title="{f:render(section: 'documentBreadcrumb', arguments: {node: event.node})}"
+                data="{neos-toggle: 'tooltip'}"
+            >
                 <i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
             </f:link.action>
-            <neos:link.node node="{event.node}"><i class="icon-external-link fas fa-external-link-alt"></i></neos:link.node>
+            <neos:link.node node="{event.node}">
+                <i class="icon-external-link fas fa-external-link-alt"></i>
+            </neos:link.node>
         </f:then>
+
         <f:else>
-            <f:link.action action="index" arguments="{node: event.nodeIdentifier, site: site}" title="{neos:backend.translate(id: 'history.nodeRemovedInMeantime', source: 'Modules', package: 'Neos.Neos')}" data="{'neos-toggle': 'tooltip'}">
+            <f:link.action
+                action="index"
+                arguments="{node: event.nodeIdentifier, site: site}"
+                title="{neos:backend.translate(
+                    id: 'history.nodeRemovedInMeantime',
+                    source: 'Modules',
+                    package: 'Neos.Neos'
+                )}"
+                data="{neos-toggle: 'tooltip'}"
+            >
                 <i class="{ae:nodeTypeIcon(nodeType: event.data.documentNodeType)}"></i> {event.data.documentNodeLabel}
             </f:link.action>
         </f:else>
@@ -191,76 +310,86 @@
 </f:section>
 
 <f:section name="documentBreadcrumb">
-    <neos:backend.documentBreadcrumbPath node="{node}"><f:for each="{documentNodes}" as="documentNode" iteration="{iterator}">/ {documentNode.label} </f:for></neos:backend.documentBreadcrumbPath>
+    <neos:backend.documentBreadcrumbPath node="{node}">
+        <f:for each="{documentNodes}" as="documentNode"> / {documentNode.label}</f:for>
+    </neos:backend.documentBreadcrumbPath>
 </f:section>
 
 <f:if condition="{nextPage}">
-  <div class="loadMore" data-neos-history-nextpage="{nextPage -> f:format.raw()}">
-      <button>{neos:backend.translate(id: 'history.loadMore.label', source: 'Modules', package: 'Neos.Neos')}</button>
-  </div>
+    <div class="loadMore" data-neos-history-nextpage="{nextPage -> f:format.raw()}">
+        <button>{neos:backend.translate(id: 'history.loadMore.label', source: 'Modules', package: 'Neos.Neos')}</button>
+    </div>
 </f:if>
 
 <script>
-    $(function() {
-        var loadMore = $('.loadMore');
-        var nextPage = loadMore.data('neos-history-nextpage');
-        var historyContainer = $('.neos-history');
-        $('#site, #account').change(function() {
+    $(function () {
+        var $historyContainer,
+            $loadMore,
+            nextPage
+        ;
+
+        $('#site, #account').change(function () {
             this.form.submit();
         });
-        $('button', loadMore).click(function() {
+
+        $historyContainer = $('.neos-history');
+        $loadMore = $('.loadMore');
+        nextPage = $loadMore.data('neos-history-nextpage');
+        $('button', $loadMore).click(function () {
             $.ajax({
                 url: nextPage,
-                type: 'GET'
-            }).done(function(data) {
+                type: 'GET',
+            }).done(function (data) {
                 nextPage = $(data).find('.loadMore').data('neos-history-nextpage');
                 if (typeof nextPage === 'undefined') {
-                    $('.loadMore').hide();
+                    $loadMore.hide();
                 }
 
-                var days = $(data).find('.neos-history-day');
-                days.each(function(index, day) {
+                var $days = $(data).find('.neos-history-day');
+                $days.each(function (index, day) {
                     var date = $(day).data('date');
                     var $existingDay = $('[data-date="' + date + '"]');
 
                     if ($existingDay.length > 0) {
-                        $(day).find('.neos-history-event').each(function(index, event) {
+                        $(day).find('.neos-history-event').each(function (index, event) {
                             $existingDay.find('.neos-history-events').append(event);
                         });
                     } else {
-                        historyContainer.append(day);
+                        $historyContainer.append(day);
                     }
                     initializeBootstrap();
                 });
             });
         });
-        var initializeBootstrap = function() {
+
+        var initializeBootstrap = function () {
             require(
                 {
                     baseUrl: 'resource://Neos.Neos/Public/JavaScript',
                     paths: requirePaths,
                     context: 'neos',
-                    locale: 'en'
+                    locale: 'en',
                 },
-                [
-                    'Library/jquery-with-dependencies'
-                ],
-                function($) {
+                ['Library/jquery-with-dependencies'],
+                function ($) {
                     $('[data-neos-toggle="popover"]').popover();
                     $('[data-neos-toggle="tooltip"]').tooltip();
-                    $('[data-neos-toggle]').on('click', function() {
+                    $('[data-neos-toggle]').on('click', function () {
                         $('[data-neos-toggle]').not(this).popover('hide');
                     });
                     $('body').on('click', function (e) {
-                        if ($(e.target).data('neos-toggle') !== 'popover' &&
-                            $(e.target).parents('[data-neos-toggle="popover"]').length === 0 &&
-                            $(e.target).parents('.neos-popover.neos-in').length === 0) {
+                        let $target = $(e.target);
+                        if ($target.data('neos-toggle') !== 'popover' &&
+                            $target.parents('[data-neos-toggle="popover"]').length === 0 &&
+                            $target.parents('.neos-popover.neos-in').length === 0
+                        ) {
                             $('[data-neos-toggle]').popover('hide');
                         }
                     });
-                }
-            )
-        }
+                },
+            );
+        };
+
         initializeBootstrap();
-    })
+    });
 </script>
