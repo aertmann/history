@@ -2,13 +2,13 @@ include: resource://Neos.Fusion/Private/Fusion/Root.fusion
 include: resource://Neos.Neos/Private/Fusion/Backend/History/Root.fusion
 
 AE.History.HistoryController.index = AE.History:Template {
-    account = ${account}
+    accountIdentifier = ${accountIdentifier}
     accounts = ${accounts}
     eventsByDate = ${eventsByDate}
     firstEvent = ${firstEvent}
     nextPage = ${nextPage}
-    node = ${node}
-    site = ${site}
+    nodeIdentifier = ${nodeIdentifier}
+    siteIdentifier = ${siteIdentifier}
     sites = ${sites}
 
     eventRenderer = Neos.Neos:History.EventRenderer
@@ -23,10 +23,10 @@ prototype(Neos.Neos:History.EventRenderer).nodeEvent.type = 'AE.History:History.
 prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template) {
     sectionName = 'eventElement'
 
-    account = ${account}
+    accountIdentifier = ${accountIdentifier}
     event = ${event}
-    node = ${node}
-    site = ${site}
+    nodeIdentifier = ${nodeIdentifier}
+    siteIdentifier = ${siteIdentifier}
 
     content = Neos.Fusion:Array {
         @context {
@@ -48,7 +48,7 @@ prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template)
 
         content = Neos.Fusion:Case {
             changed {
-                condition = ${node == null}
+                condition = ${nodeIdentifier == null}
                 renderer = Neos.Neos:History.PublishedNode.ContentChanged {
                     @if {
                         documentNotRemoved = ${Array.first(documentEvents).eventType != 'Node.Removed'}
@@ -58,7 +58,7 @@ prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template)
             }
 
             events {
-                condition = ${node != null}
+                condition = ${nodeIdentifier != null}
                 renderer = Neos.Fusion:Collection {
                     collection = ${contentEvents}
                     itemName = 'event'
