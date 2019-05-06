@@ -45,20 +45,29 @@
                 <br/>
                 <br/>
             </f:if>
-        </form>
 
-        <f:if condition="{node}">
-            <label>
-                <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
-                <f:link.action action="index" arguments="{site: site}">
-                    <i class="icon-remove fas fa-times"></i>
-                </f:link.action>
-            </label>
-            <f:if condition="{firstEvent}">
-                <f:then><f:render section="nodeLink" arguments="{event: firstEvent, site: site}"/></f:then>
-                <f:else>{neos:backend.translate(id: 'unavailable', package: 'Neos.Neos')}</f:else>
+            <f:if condition="{node}">
+                <label>
+                    <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
+                    <f:link.action action="index" arguments="{account: account, site: site}">
+                        <i class="icon-remove fas fa-times"></i>
+                    </f:link.action>
+                </label>
+                <f:form.hidden
+                    id="node"
+                    name="moduleArguments[node]"
+                    value="{node}"
+                />
+
+                <f:if condition="{firstEvent}">
+                    <f:then>
+                        <f:render section="nodeLink" arguments="{account: account, event: firstEvent, site: site}"/>
+                    </f:then>
+
+                    <f:else>{neos:backend.translate(id: 'unavailable', package: 'Neos.Neos')}</f:else>
+                </f:if>
             </f:if>
-        </f:if>
+        </form>
     </div>
 
     <f:if condition="{eventsByDate}">
@@ -93,7 +102,7 @@
                             <f:for each="{eventsByTime}" as="event">
                                 <fusion:render
                                     path="eventRenderer"
-                                    context="{event: event, node: node, site: site}"
+                                    context="{account: account, event: event, node: node, site: site}"
                                 />
                             </f:for>
                         </f:groupedFor>
@@ -283,7 +292,7 @@
         <f:then>
             <f:link.action
                 action="index"
-                arguments="{node: event.nodeIdentifier, site: site}"
+                arguments="{account: account, node: event.nodeIdentifier, site: site}"
                 title="{f:render(section: 'documentBreadcrumb', arguments: {node: event.node})}"
                 data="{neos-toggle: 'tooltip'}"
             >
@@ -297,7 +306,7 @@
         <f:else>
             <f:link.action
                 action="index"
-                arguments="{node: event.nodeIdentifier, site: site}"
+                arguments="{account: account, node: event.nodeIdentifier, site: site}"
                 title="{neos:backend.translate(
                     id: 'history.nodeRemovedInMeantime',
                     source: 'Modules',

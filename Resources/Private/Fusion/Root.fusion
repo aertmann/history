@@ -23,6 +23,7 @@ prototype(Neos.Neos:History.EventRenderer).nodeEvent.type = 'AE.History:History.
 prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template) {
     sectionName = 'eventElement'
 
+    account = ${account}
     event = ${event}
     node = ${node}
     site = ${site}
