@@ -82,14 +82,8 @@ class HistoryController extends AbstractModuleController
         string $nodeIdentifier = null,
         string $accountIdentifier = null
     ) {
-        if ($accountIdentifier === '') {
-            $accountIdentifier = null;
-        }
         if ($nodeIdentifier === '') {
             $nodeIdentifier = null;
-        }
-        if ($siteIdentifier === '') {
-            $siteIdentifier = null;
         }
 
         $numberOfSites = 0;
@@ -119,9 +113,9 @@ class HistoryController extends AbstractModuleController
                 $offset,
                 $limit + 1,
                 'live',
-                $siteIdentifier,
+                $siteIdentifier ?: null,
                 $nodeIdentifier,
-                $accountIdentifier
+                $accountIdentifier ?: null
             )
             ->toArray()
         ;
