@@ -9,7 +9,7 @@ AE.History.HistoryController.index = AE.History:Template {
     nodeIdentifier = ${nodeIdentifier}
     siteIdentifier = ${siteIdentifier}
     sites = ${sites}
-    userNames = ${userNames}
+    accounts = ${accounts}
 
     eventRenderer = Neos.Neos:History.EventRenderer
 }

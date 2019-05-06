@@ -21,9 +21,9 @@ class NodeEventRepository extends EventRepository
      * @param int $offset
      * @param int $limit
      * @param string $workspaceName
-     * @param string $siteIdentifier
-     * @param string $nodeIdentifier
-     * @param string $accountIdentifier
+     * @param string|null $siteIdentifier
+     * @param string|null $nodeIdentifier
+     * @param string|null $accountIdentifier
      *
      * @return QueryResultInterface
      */
@@ -65,5 +65,53 @@ class NodeEventRepository extends EventRepository
         $queryBuilder->setMaxResults($limit);
 
         return $query->execute();
+    }
+
+    /**
+     * Find all account identifiers that modified a specific site
+     *
+     * @param string $workspaceName
+     * @param string|null $siteIdentifier
+     * @param string|null $nodeIdentifier
+     *
+     * @return array
+     */
+    public function findAccountIdentifiers(
+        string $workspaceName,
+        string $siteIdentifier = null,
+        string $nodeIdentifier = null
+    ) : array {
+        $query = $this->prepareRelevantEventsQuery();
+        $queryBuilder = $query->getQueryBuilder();
+        $queryBuilder
+            ->andWhere('e.workspaceName = :workspaceName AND e.eventType = :eventType')
+            ->setParameter('workspaceName', $workspaceName)
+            ->setParameter('eventType', 'Node.Published')
+        ;
+        if ($siteIdentifier !== null) {
+            $siteCondition = '%' . trim(json_encode(['site' => $siteIdentifier], JSON_PRETTY_PRINT), "{}\n\t ") . '%';
+            $queryBuilder
+                ->andWhere('NEOSCR_TOSTRING(e.data) LIKE :site')
+                ->setParameter('site', $siteCondition)
+            ;
+        }
+        if ($nodeIdentifier !== null) {
+            $queryBuilder
+                ->andWhere('e.nodeIdentifier = :nodeIdentifier')
+                ->setParameter('nodeIdentifier', $nodeIdentifier)
+            ;
+        }
+
+        $queryBuilder->groupBy('e.accountIdentifier');
+        $queryBuilder->orderBy(null);
+
+        $dql = str_replace('SELECT e', 'SELECT e.accountIdentifier', rtrim($queryBuilder->getDql(), ' ORDER BY '));
+
+        $dqlQuery = $this->createDqlQuery($dql);
+        $dqlQuery->setParameters($query->getParameters());
+
+        return array_map(function($result) {
+            return $result['accountIdentifier'];
+        }, $dqlQuery->execute());
     }
 }

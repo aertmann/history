@@ -26,7 +26,7 @@
                 <br/>
             </f:if>
 
-            <f:if condition="{userNames -> f:count()} > 1">
+            <f:if condition="{accounts -> f:count()} > 1">
                 <label for="accountIdentifier"><b>{neos:backend.translate(
                     id: 'user.label',
                     package: 'Neos.Neos',
@@ -35,7 +35,7 @@
                 <f:form.select
                     id="accountIdentifier"
                     name="moduleArguments[accountIdentifier]"
-                    options="{userNames}"
+                    options="{accounts}"
                     prependOptionLabel="All"
                     sortByOptionLabel="true"
                     value="{accountIdentifier}"

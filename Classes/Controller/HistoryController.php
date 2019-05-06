@@ -5,7 +5,6 @@ use AE\History\Domain\Repository\NodeEventRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Security\Account;
-use Neos\Flow\Security\AccountRepository;
 use Neos\Flow\Security\Context;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\Controller\CreateContentContextTrait;
@@ -22,12 +21,6 @@ use Neos\Neos\EventLog\Domain\Model\NodeEvent;
 class HistoryController extends AbstractModuleController
 {
     use CreateContentContextTrait;
-
-    /**
-     * @Flow\Inject
-     * @var AccountRepository
-     */
-    protected $accountRepository;
 
     /**
      * @var string
@@ -99,12 +92,12 @@ class HistoryController extends AbstractModuleController
             }
         }
 
-        /** @var string[] $userNames */
-        $userNames = [];
-        foreach ($this->accountRepository->findByAuthenticationProviderName('Neos.Neos:Backend') as $account) {
-            /** @var Account $account */
-            $identifier = $account->getAccountIdentifier();
-            $userNames[$identifier] = $this->userService->getUser($identifier)->getName()->getFullName();
+        /** @var string[] $accounts */
+        $accounts = [];
+        $accountIdentifiers = $this->nodeEventRepository->findAccountIdentifiers('live', $siteIdentifier ?: null, $nodeIdentifier ?: null);
+        foreach ($accountIdentifiers as $identifier) {
+            $user = $this->userService->getUser($identifier);
+            $accounts[$identifier] = $user ? $user->getName()->getFullName() : $identifier;
         }
 
         /** @var NodeEvent[] $events */
@@ -180,7 +173,7 @@ class HistoryController extends AbstractModuleController
             'nodeIdentifier' => $nodeIdentifier,
             'siteIdentifier' => $siteIdentifier,
             'sites' => $sites,
-            'userNames' => $userNames,
+            'accounts' => $accounts,
         ]);
     }
 
