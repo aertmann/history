@@ -12,56 +12,66 @@
     <div class="neos-history-info">
         <form action="{f:uri.action(action: 'index')}" method="get">
             <f:if condition="{sites -> f:count()} > 1">
-                <label for="site"><b>{neos:backend.translate(id: 'site', package: 'Neos.Neos')}</b></label>
+                <label for="siteIdentifier"><b>{neos:backend.translate(id: 'site', package: 'Neos.Neos')}</b></label>
                 <f:form.select
-                    id="site"
-                    name="moduleArguments[site]"
+                    id="siteIdentifier"
+                    name="moduleArguments[siteIdentifier]"
                     optionLabelField="name"
                     options="{sites}"
                     prependOptionLabel="All"
                     sortByOptionLabel="true"
-                    value="{site}"
+                    value="{siteIdentifier}"
                 />
                 <br/>
                 <br/>
             </f:if>
 
             <f:if condition="{accounts -> f:count()} > 1">
-                <label for="account"><b>{neos:backend.translate(
+                <label for="accountIdentifier"><b>{neos:backend.translate(
                     id: 'user.label',
                     package: 'Neos.Neos',
                     source: 'Modules'
                 )}</b></label>
                 <f:form.select
-                    id="account"
-                    name="moduleArguments[account]"
+                    id="accountIdentifier"
+                    name="moduleArguments[accountIdentifier]"
                     optionLabelField="accountIdentifier"
                     optionValueField="accountIdentifier"
                     options="{accounts}"
                     prependOptionLabel="All"
                     sortByOptionLabel="true"
-                    value="{account}"
+                    value="{accountIdentifier}"
                 />
                 <br/>
                 <br/>
             </f:if>
 
-            <f:if condition="{node}">
+            <f:if condition="{nodeIdentifier}">
                 <label>
                     <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
-                    <f:link.action action="index" arguments="{account: account, site: site}">
+                    <f:link.action
+                        action="index"
+                        arguments="{accountIdentifier: accountIdentifier, siteIdentifier: siteIdentifier}"
+                    >
                         <i class="icon-remove fas fa-times"></i>
                     </f:link.action>
                 </label>
                 <f:form.hidden
-                    id="node"
-                    name="moduleArguments[node]"
-                    value="{node}"
+                    id="nodeIdentifier"
+                    name="moduleArguments[nodeIdentifier]"
+                    value="{nodeIdentifier}"
                 />
 
                 <f:if condition="{firstEvent}">
                     <f:then>
-                        <f:render section="nodeLink" arguments="{account: account, event: firstEvent, site: site}"/>
+                        <f:render
+                            section="nodeLink"
+                            arguments="{
+                                accountIdentifier: accountIdentifier,
+                                event: firstEvent,
+                                siteIdentifier: siteIdentifier
+                            }"
+                        />
                     </f:then>
 
                     <f:else>{neos:backend.translate(id: 'unavailable', package: 'Neos.Neos')}</f:else>
@@ -102,7 +112,12 @@
                             <f:for each="{eventsByTime}" as="event">
                                 <fusion:render
                                     path="eventRenderer"
-                                    context="{account: account, event: event, node: node, site: site}"
+                                    context="{
+                                        accountIdentifier: accountIdentifier,
+                                        event: event,
+                                        nodeIdentifier: nodeIdentifier,
+                                        siteIdentifier: siteIdentifier
+                                    }"
                                 />
                             </f:for>
                         </f:groupedFor>
@@ -122,7 +137,7 @@
 <f:section name="eventElement">
     <div class="neos-history-event">
         <div class="neos-history-event-arrow"></div>
-        <f:if condition="{node}">
+        <f:if condition="{nodeIdentifier}">
             <f:else>
                 <h3 class="neos-history-event-title">
                     <f:render section="nodeLink" arguments="{_all}"/>
@@ -292,7 +307,11 @@
         <f:then>
             <f:link.action
                 action="index"
-                arguments="{account: account, node: event.nodeIdentifier, site: site}"
+                arguments="{
+                    accountIdentifier: accountIdentifier,
+                    nodeIdentifier: event.nodeIdentifier,
+                    siteIdentifier: siteIdentifier
+                }"
                 title="{f:render(section: 'documentBreadcrumb', arguments: {node: event.node})}"
                 data="{neos-toggle: 'tooltip'}"
             >
@@ -306,7 +325,11 @@
         <f:else>
             <f:link.action
                 action="index"
-                arguments="{account: account, node: event.nodeIdentifier, site: site}"
+                arguments="{
+                    accountIdentifier: accountIdentifier,
+                    nodeIdentifier: event.nodeIdentifier,
+                    siteIdentifier: siteIdentifier
+                }"
                 title="{neos:backend.translate(
                     id: 'history.nodeRemovedInMeantime',
                     source: 'Modules',
@@ -339,7 +362,7 @@
             nextPage
         ;
 
-        $('#site, #account').change(function () {
+        $('#siteIdentifier, #accountIdentifier').change(function () {
             this.form.submit();
         });
 
