@@ -3,13 +3,13 @@ include: resource://Neos.Neos/Private/Fusion/Backend/History/Root.fusion
 
 AE.History.HistoryController.index = AE.History:Template {
     accountIdentifier = ${accountIdentifier}
-    accounts = ${accounts}
     eventsByDate = ${eventsByDate}
     firstEvent = ${firstEvent}
     nextPage = ${nextPage}
     nodeIdentifier = ${nodeIdentifier}
     siteIdentifier = ${siteIdentifier}
     sites = ${sites}
+    userNames = ${userNames}
 
     eventRenderer = Neos.Neos:History.EventRenderer
 }

@@ -12,6 +12,7 @@ use Neos\Neos\Controller\CreateContentContextTrait;
 use Neos\Neos\Controller\Module\AbstractModuleController;
 use Neos\Neos\Domain\Repository\DomainRepository;
 use Neos\Neos\Domain\Repository\SiteRepository;
+use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\EventLog\Domain\Model\EventsOnDate;
 use Neos\Neos\EventLog\Domain\Model\NodeEvent;
 
@@ -58,6 +59,12 @@ class HistoryController extends AbstractModuleController
     protected $siteRepository;
 
     /**
+     * @Flow\Inject
+     * @var UserService
+     */
+    protected $userService;
+
+    /**
      * Show event overview.
      *
      * @param int $offset
@@ -98,8 +105,13 @@ class HistoryController extends AbstractModuleController
             }
         }
 
-        /** @var Account[] $accounts */
-        $accounts = $this->accountRepository->findByAuthenticationProviderName('Neos.Neos:Backend')->toArray();
+        /** @var string[] $userNames */
+        $userNames = [];
+        foreach ($this->accountRepository->findByAuthenticationProviderName('Neos.Neos:Backend') as $account) {
+            /** @var Account $account */
+            $identifier = $account->getAccountIdentifier();
+            $userNames[$identifier] = $this->userService->getUser($identifier)->getName()->getFullName();
+        }
 
         /** @var NodeEvent[] $events */
         $events = $this->nodeEventRepository
@@ -163,13 +175,13 @@ class HistoryController extends AbstractModuleController
 
         $this->view->assignMultiple([
             'accountIdentifier' => $accountIdentifier,
-            'accounts' => $accounts,
             'eventsByDate' => $eventsByDate,
             'firstEvent' => $firstEvent,
             'nextPage' => $nextPage,
             'nodeIdentifier' => $nodeIdentifier,
             'siteIdentifier' => $siteIdentifier,
             'sites' => $sites,
+            'userNames' => $userNames,
         ]);
     }
 
