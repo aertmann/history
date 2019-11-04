@@ -28,12 +28,13 @@ class DiffViewHelper extends AbstractViewHelper
      * Renders the difference between the original and the changed content of the given node and returns it, along
      * with meta information, in an array.
      *
-     * @param NodeEvent $nodeEvent
-     *
      * @return string
+     * @throws \Neos\ContentRepository\Exception\NodeTypeNotFoundException
      */
-    public function render(NodeEvent $nodeEvent) : string
+    public function render() : string
     {
+        $nodeEvent = $this->arguments['nodeEvent'];
+
         $data = $nodeEvent->getData();
         $old = $data['old'];
         $new = $data['new'];

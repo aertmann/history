@@ -14,14 +14,24 @@ class AssetExistsViewHelper extends AbstractViewHelper
     protected $escapeOutput = false;
 
     /**
+     * @throws \Neos\FluidAdaptor\Core\ViewHelper\Exception
+     */
+    public function initializeArguments()
+    {
+        parent::initializeArguments();
+
+        $this->registerArgument('asset', AssetInterface::class, 'AssetInterface', true);
+    }
+
+    /**
      * Checks if an asset exists.
-     *
-     * @param AssetInterface $asset
      *
      * @return string
      */
-    public function render(AssetInterface $asset) : string
+    public function render() : string
     {
+        $asset = $this->arguments['asset'];
+
         try {
             $asset->getResource();
         } catch (EntityNotFoundException $e) {
