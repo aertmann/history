@@ -19,12 +19,23 @@ class NodeTypeIconViewHelper extends AbstractViewHelper
     protected $nodeTypeManager;
 
     /**
-     * @param string $nodeType
-     *
-     * @return string
+     * @throws \Neos\FluidAdaptor\Core\ViewHelper\Exception
      */
-    public function render(string $nodeType) : string
+    public function initializeArguments()
     {
+        parent::initializeArguments();
+
+        $this->registerArgument('nodeType', 'string', 'NodeType', true);
+    }
+
+    /**
+     * @return string
+     * @throws \Neos\ContentRepository\Exception\NodeTypeNotFoundException
+     */
+    public function render() : string
+    {
+        $nodeType = $this->arguments['nodeType'];
+
         return $this->nodeTypeManager->getNodeType($nodeType)->getConfiguration('ui.icon');
     }
 }
