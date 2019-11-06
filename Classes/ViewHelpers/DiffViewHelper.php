@@ -7,10 +7,15 @@ use Neos\Diff\Diff;
 use Neos\Diff\Renderer\Html\HtmlArrayRenderer;
 use Neos\Flow\Annotations as Flow;
 use Neos\FluidAdaptor\Core\ViewHelper\AbstractViewHelper;
+use Neos\FluidAdaptor\Core\ViewHelper\Exception as ViewHelperException;
 use Neos\Media\Domain\Model\AssetInterface;
 use Neos\Media\Domain\Model\ImageInterface;
 use Neos\Neos\EventLog\Domain\Model\NodeEvent;
 
+/**
+ * Renders the difference between the original and the changed content of the given node and returns it, along with meta
+ * information, in an array.
+ */
 class DiffViewHelper extends AbstractViewHelper
 {
     /**
@@ -25,17 +30,24 @@ class DiffViewHelper extends AbstractViewHelper
     protected $nodeTypeManager;
 
     /**
-     * Renders the difference between the original and the changed content of the given node and returns it, along
-     * with meta information, in an array.
+     * @return void
      *
+     * @throws ViewHelperException
+     */
+    public function initializeArguments() : void
+    {
+        parent::initializeArguments();
+
+        $this->registerArgument('nodeEvent', NodeEvent::class, 'The NodeEvent to extract the diff from.', true);
+    }
+
+    /**
      * @return string
      * @throws \Neos\ContentRepository\Exception\NodeTypeNotFoundException
      */
     public function render() : string
     {
-        $nodeEvent = $this->arguments['nodeEvent'];
-
-        $data = $nodeEvent->getData();
+        $data = $this->arguments['nodeEvent']->getData();
         $old = $data['old'];
         $new = $data['new'];
         $nodeType = $this->nodeTypeManager->getNodeType($data['nodeType']);

@@ -4,6 +4,7 @@ namespace AE\History\ViewHelpers;
 use Neos\Flow\Annotations as Flow;
 use Neos\FluidAdaptor\Core\ViewHelper\AbstractViewHelper;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
+use Neos\FluidAdaptor\Core\ViewHelper\Exception as ViewHelperException;
 
 class NodeTypeIconViewHelper extends AbstractViewHelper
 {
@@ -19,13 +20,15 @@ class NodeTypeIconViewHelper extends AbstractViewHelper
     protected $nodeTypeManager;
 
     /**
-     * @throws \Neos\FluidAdaptor\Core\ViewHelper\Exception
+     * @return void
+     *
+     * @throws ViewHelperException
      */
-    public function initializeArguments()
+    public function initializeArguments() : void
     {
         parent::initializeArguments();
 
-        $this->registerArgument('nodeType', 'string', 'NodeType', true);
+        $this->registerArgument('nodeType', 'string', 'The name of the NodeType.', true);
     }
 
     /**
@@ -34,8 +37,6 @@ class NodeTypeIconViewHelper extends AbstractViewHelper
      */
     public function render() : string
     {
-        $nodeType = $this->arguments['nodeType'];
-
-        return $this->nodeTypeManager->getNodeType($nodeType)->getConfiguration('ui.icon');
+        return $this->nodeTypeManager->getNodeType($this->arguments['nodeType'])->getConfiguration('ui.icon');
     }
 }

@@ -4,7 +4,6 @@ namespace AE\History\Controller;
 use AE\History\Domain\Repository\NodeEventRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
-use Neos\Flow\Security\Account;
 use Neos\Flow\Security\Context;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\Controller\CreateContentContextTrait;
