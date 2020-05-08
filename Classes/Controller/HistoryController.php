@@ -96,7 +96,7 @@ class HistoryController extends AbstractModuleController
         $accountIdentifiers = $this->nodeEventRepository->findAccountIdentifiers('live', $siteIdentifier ?: null, $nodeIdentifier ?: null);
         foreach ($accountIdentifiers as $identifier) {
             $user = $this->userService->getUser($identifier);
-            $accounts[$identifier] = $user ? $user->getName()->getFullName() : $identifier;
+            $accounts[$identifier] = $user ? $user->getName()->getLastName() . ' ' . $user->getName()->getFirstName() : $identifier;
         }
 
         /** @var NodeEvent[] $events */
