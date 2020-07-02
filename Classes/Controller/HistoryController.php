@@ -126,9 +126,7 @@ class HistoryController extends AbstractModuleController
                         'nodeIdentifier' => $nodeIdentifier,
                         'offset' => $offset + $limit,
                         'siteIdentifier' => $siteIdentifier,
-                    ],
-                    'History',
-                    'Neos.Neos'
+                    ]
                 )
             ;
         }
