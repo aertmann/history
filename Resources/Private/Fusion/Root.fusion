@@ -3,6 +3,7 @@ include: resource://Neos.Neos/Private/Fusion/Backend/History/Root.fusion
 
 AE.History.HistoryController.index = AE.History:Template {
     accountIdentifier = ${accountIdentifier}
+    dimensionsHash = ${dimensionsHash}
     eventsByDate = ${eventsByDate}
     firstEvent = ${firstEvent}
     nextPage = ${nextPage}
@@ -10,6 +11,7 @@ AE.History.HistoryController.index = AE.History:Template {
     siteIdentifier = ${siteIdentifier}
     sites = ${sites}
     accounts = ${accounts}
+    dimensions = ${dimensions}
 
     eventRenderer = Neos.Neos:History.EventRenderer
 }

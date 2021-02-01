@@ -10,6 +10,7 @@ use Neos\Neos\Controller\CreateContentContextTrait;
 use Neos\Neos\Controller\Module\AbstractModuleController;
 use Neos\Neos\Domain\Repository\DomainRepository;
 use Neos\Neos\Domain\Repository\SiteRepository;
+use Neos\Neos\Domain\Service\ConfigurationContentDimensionPresetSource;
 use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\EventLog\Domain\Model\EventsOnDate;
 use Neos\Neos\EventLog\Domain\Model\NodeEvent;
@@ -57,6 +58,12 @@ class HistoryController extends AbstractModuleController
     protected $userService;
 
     /**
+     * @Flow\Inject
+     * @var ConfigurationContentDimensionPresetSource
+     */
+    protected $configurationContentDimensionPresetSource;
+
+    /**
      * Show event overview.
      *
      * @param int $offset
@@ -64,15 +71,19 @@ class HistoryController extends AbstractModuleController
      * @param string|null $siteIdentifier
      * @param string|null $nodeIdentifier
      * @param string|null $accountIdentifier
-     *
+     * @param string|null $dimensionsHash
      * @return void
+     * @throws \Neos\Flow\Http\Exception
+     * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
+     * @throws \Neos\Neos\Domain\Exception
      */
     public function indexAction(
         int $offset = 0,
         int $limit = 25,
         string $siteIdentifier = null,
         string $nodeIdentifier = null,
-        string $accountIdentifier = null
+        string $accountIdentifier = null,
+        string $dimensionsHash = null
     ) {
         if ($nodeIdentifier === '') {
             $nodeIdentifier = null;
@@ -99,6 +110,25 @@ class HistoryController extends AbstractModuleController
             $accounts[$identifier] = $user ? $user->getName()->getFullName() : $identifier;
         }
 
+        $dimensions = [];
+
+        $savedDimensions = $this->nodeEventRepository->findUniqueDimensions();
+
+        if (!empty($savedDimensions)) {
+            $dimensionPresets = $this->configurationContentDimensionPresetSource->getAllPresets();
+
+            foreach ($savedDimensions as $savedDimensionData) {
+                $label = '';
+                foreach ($savedDimensionData['dimension'] as $dimension => $value) {
+                    $presetLabel = str_replace(' ', '-', $dimensionPresets[$dimension]['presets'][$value[0]]['label']);
+                    $label .= $presetLabel . '_';
+                }
+
+                $dimensions[$savedDimensionData['dimensionsHash']] = rtrim($label, '_');
+            }
+
+        }
+
         /** @var NodeEvent[] $events */
         $events = $this->nodeEventRepository
             ->findRelevantEventsByWorkspace(
@@ -107,7 +137,8 @@ class HistoryController extends AbstractModuleController
                 'live',
                 $siteIdentifier ?: null,
                 $nodeIdentifier,
-                $accountIdentifier ?: null
+                $accountIdentifier ?: null,
+                $dimensionsHash ?: null
             )
             ->toArray()
         ;
@@ -126,9 +157,7 @@ class HistoryController extends AbstractModuleController
                         'nodeIdentifier' => $nodeIdentifier,
                         'offset' => $offset + $limit,
                         'siteIdentifier' => $siteIdentifier,
-                    ],
-                    'History',
-                    'Neos.Neos'
+                    ]
                 )
             ;
         }
@@ -166,6 +195,7 @@ class HistoryController extends AbstractModuleController
 
         $this->view->assignMultiple([
             'accountIdentifier' => $accountIdentifier,
+            'dimensionsHash' => $dimensionsHash,
             'eventsByDate' => $eventsByDate,
             'firstEvent' => $firstEvent,
             'nextPage' => $nextPage,
@@ -173,6 +203,7 @@ class HistoryController extends AbstractModuleController
             'siteIdentifier' => $siteIdentifier,
             'sites' => $sites,
             'accounts' => $accounts,
+            'dimensions' => $dimensions,
         ]);
     }
 

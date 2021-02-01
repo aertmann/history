@@ -24,7 +24,7 @@ class NodeEventRepository extends EventRepository
      * @param string|null $siteIdentifier
      * @param string|null $nodeIdentifier
      * @param string|null $accountIdentifier
-     *
+     * @param string|null $dimensionsHash
      * @return QueryResultInterface
      */
     public function findRelevantEventsByWorkspace(
@@ -33,7 +33,8 @@ class NodeEventRepository extends EventRepository
         $workspaceName,
         string $siteIdentifier = null,
         string $nodeIdentifier = null,
-        string $accountIdentifier = null
+        string $accountIdentifier = null,
+        string $dimensionsHash = null
     ) : QueryResultInterface {
         $query = $this->prepareRelevantEventsQuery();
         $queryBuilder = $query->getQueryBuilder();
@@ -59,6 +60,12 @@ class NodeEventRepository extends EventRepository
             $queryBuilder
                 ->andWhere('e.accountIdentifier = :accountIdentifier')
                 ->setParameter('accountIdentifier', $accountIdentifier)
+            ;
+        }
+        if ($dimensionsHash !== null) {
+            $queryBuilder
+                ->andWhere('e.dimensionsHash = :dimensionsHash')
+                ->setParameter('dimensionsHash', $dimensionsHash)
             ;
         }
         $queryBuilder->setFirstResult($offset);
@@ -110,8 +117,19 @@ class NodeEventRepository extends EventRepository
         $dqlQuery = $this->createDqlQuery($dql);
         $dqlQuery->setParameters($query->getParameters());
 
-        return array_map(function($result) {
+        return array_map(static function ($result) {
             return $result['accountIdentifier'];
         }, $dqlQuery->execute());
+    }
+
+    public function findUniqueDimensions(): array
+    {
+        $queryBuilder = $this->createQueryBuilder('event');
+        $queryBuilder
+            ->select('event.dimension')
+            ->addSelect('event.dimensionsHash')
+            ->where($queryBuilder->expr()->isNotNull('event.dimension'));
+        $queryBuilder->groupBy('event.dimensionsHash');
+        return $queryBuilder->getQuery()->getArrayResult();
     }
 }

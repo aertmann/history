@@ -44,6 +44,24 @@
                 <br/>
             </f:if>
 
+            <f:if condition="{dimensions -> f:count()} > 1">
+                <label for="dimensionsHash"><b>{neos:backend.translate(
+                    id: 'contentDimensions',
+                    package: 'Neos.Neos',
+                    source: 'Main'
+                    )}</b></label>
+                <f:form.select
+                        id="dimensionsHash"
+                        name="moduleArguments[dimensionsHash]"
+                        options="{dimensions}"
+                        prependOptionLabel="All"
+                        sortByOptionLabel="true"
+                        value="{dimensionsHash}"
+                />
+                <br/>
+                <br/>
+            </f:if>
+
             <f:if condition="{nodeIdentifier}">
                 <label>
                     <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
@@ -360,7 +378,7 @@
             nextPage
         ;
 
-        $('#siteIdentifier, #accountIdentifier').change(function () {
+        $('#siteIdentifier, #accountIdentifier, #dimensionsHash').change(function () {
             this.form.submit();
         });
 
