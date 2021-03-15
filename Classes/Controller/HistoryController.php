@@ -2,6 +2,8 @@
 namespace AE\History\Controller;
 
 use AE\History\Domain\Repository\NodeEventRepository;
+use Neos\ContentRepository\Domain\Model\Workspace;
+use Neos\ContentRepository\Domain\Repository\WorkspaceRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Security\Context;
@@ -57,6 +59,12 @@ class HistoryController extends AbstractModuleController
     protected $userService;
 
     /**
+     * @Flow\Inject
+     * @var WorkspaceRepository
+     */
+    protected $workspaceRepository;
+
+    /**
      * Show event overview.
      *
      * @param int $offset
@@ -64,6 +72,7 @@ class HistoryController extends AbstractModuleController
      * @param string|null $siteIdentifier
      * @param string|null $nodeIdentifier
      * @param string|null $accountIdentifier
+     * @param string $workspaceName
      *
      * @return void
      */
@@ -72,7 +81,8 @@ class HistoryController extends AbstractModuleController
         int $limit = 25,
         string $siteIdentifier = null,
         string $nodeIdentifier = null,
-        string $accountIdentifier = null
+        string $accountIdentifier = null,
+        string $workspaceName = 'live'
     ) {
         if ($nodeIdentifier === '') {
             $nodeIdentifier = null;
@@ -93,7 +103,7 @@ class HistoryController extends AbstractModuleController
 
         /** @var string[] $accounts */
         $accounts = [];
-        $accountIdentifiers = $this->nodeEventRepository->findAccountIdentifiers('live', $siteIdentifier ?: null, $nodeIdentifier ?: null);
+        $accountIdentifiers = $this->nodeEventRepository->findAccountIdentifiers($workspaceName, $siteIdentifier ?: null, $nodeIdentifier ?: null);
         foreach ($accountIdentifiers as $identifier) {
             $user = $this->userService->getUser($identifier);
             $accounts[$identifier] = $user ? $user->getName()->getLastName() . ', ' . $user->getName()->getFirstName() : $identifier;
@@ -104,7 +114,7 @@ class HistoryController extends AbstractModuleController
             ->findRelevantEventsByWorkspace(
                 $offset,
                 $limit + 1,
-                'live',
+                $workspaceName,
                 $siteIdentifier ?: null,
                 $nodeIdentifier,
                 $accountIdentifier ?: null
@@ -126,6 +136,7 @@ class HistoryController extends AbstractModuleController
                         'nodeIdentifier' => $nodeIdentifier,
                         'offset' => $offset + $limit,
                         'siteIdentifier' => $siteIdentifier,
+                        'workspaceName' => $workspaceName,
                     ]
                 )
             ;
@@ -149,7 +160,7 @@ class HistoryController extends AbstractModuleController
 
         $firstEvent = current($events);
         if ($firstEvent === false) {
-            $node = $this->createContentContext('live')->getNodeByIdentifier($nodeIdentifier);
+            $node = $this->createContentContext($workspaceName)->getNodeByIdentifier($nodeIdentifier);
             if ($node !== null) {
                 $firstEvent = [
                     'data' => [
@@ -162,6 +173,13 @@ class HistoryController extends AbstractModuleController
             }
         }
 
+        $workspaces = array_filter(
+            $this->workspaceRepository->findAll()->toArray(),
+            static function(Workspace $workspace) {
+                return $workspace->getOwner() === null;
+            }
+        );
+
         $this->view->assignMultiple([
             'accountIdentifier' => $accountIdentifier,
             'eventsByDate' => $eventsByDate,
@@ -169,8 +187,10 @@ class HistoryController extends AbstractModuleController
             'nextPage' => $nextPage,
             'nodeIdentifier' => $nodeIdentifier,
             'siteIdentifier' => $siteIdentifier,
+            'workspaceName' => $workspaceName,
             'sites' => $sites,
             'accounts' => $accounts,
+            'workspaces' => $workspaces,
         ]);
     }
 
