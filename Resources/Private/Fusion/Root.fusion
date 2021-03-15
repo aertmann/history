@@ -8,8 +8,10 @@ AE.History.HistoryController.index = AE.History:Template {
     nextPage = ${nextPage}
     nodeIdentifier = ${nodeIdentifier}
     siteIdentifier = ${siteIdentifier}
+    workspaceName = ${workspaceName}
     sites = ${sites}
     accounts = ${accounts}
+    workspaces = ${workspaces}
 
     eventRenderer = Neos.Neos:History.EventRenderer
 }
@@ -27,6 +29,7 @@ prototype(AE.History:History.NodeEventRenderer) < prototype(AE.History:Template)
     event = ${event}
     nodeIdentifier = ${nodeIdentifier}
     siteIdentifier = ${siteIdentifier}
+    workspaceName = ${workspaceName}
 
     content = Neos.Fusion:Array {
         @context {

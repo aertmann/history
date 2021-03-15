@@ -44,12 +44,35 @@
                 <br/>
             </f:if>
 
+            <f:if condition="{workspaces -> f:count()} > 1">
+                <label for="workspaceName"><b>{neos:backend.translate(
+                    id: 'workspace',
+                    package: 'Neos.Neos',
+                    source: 'Main'
+                )}</b></label>
+                <f:form.select
+                    id="workspaceName"
+                    name="moduleArguments[workspaceName]"
+                    options="{workspaces}"
+                    sortByOptionLabel="true"
+                    optionValueField="name"
+                    optionLabelField="title"
+                    value="{workspaceName}"
+                />
+                <br/>
+                <br/>
+            </f:if>
+
             <f:if condition="{nodeIdentifier}">
                 <label>
                     <b>{neos:backend.translate(id: 'page', package: 'Neos.Neos')}</b>
                     <f:link.action
                         action="index"
-                        arguments="{accountIdentifier: accountIdentifier, siteIdentifier: siteIdentifier}"
+                        arguments="{
+                            accountIdentifier: accountIdentifier,
+                            siteIdentifier: siteIdentifier,
+                            workspaceName: workspaceName
+                        }"
                     >
                         <i class="icon-remove fas fa-times"></i>
                     </f:link.action>
@@ -67,7 +90,8 @@
                             arguments="{
                                 accountIdentifier: accountIdentifier,
                                 event: firstEvent,
-                                siteIdentifier: siteIdentifier
+                                siteIdentifier: siteIdentifier,
+                                workspaceName: workspaceName
                             }"
                         />
                     </f:then>
@@ -308,7 +332,8 @@
                 arguments="{
                     accountIdentifier: accountIdentifier,
                     nodeIdentifier: event.nodeIdentifier,
-                    siteIdentifier: siteIdentifier
+                    siteIdentifier: siteIdentifier,
+                    workspaceName: workspaceName
                 }"
                 title="{f:render(section: 'documentBreadcrumb', arguments: {node: event.node})}"
                 data="{neos-toggle: 'tooltip'}"
@@ -326,7 +351,8 @@
                 arguments="{
                     accountIdentifier: accountIdentifier,
                     nodeIdentifier: event.nodeIdentifier,
-                    siteIdentifier: siteIdentifier
+                    siteIdentifier: siteIdentifier,
+                    workspaceName: workspaceName
                 }"
                 title="{neos:backend.translate(
                     id: 'history.nodeRemovedInMeantime',
@@ -360,7 +386,7 @@
             nextPage
         ;
 
-        $('#siteIdentifier, #accountIdentifier').change(function () {
+        $('#siteIdentifier, #accountIdentifier, #workspaceName').change(function () {
             this.form.submit();
         });
 
